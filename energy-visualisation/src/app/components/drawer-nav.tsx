@@ -13,6 +13,8 @@ import Image from "next/image";
 import MuiDrawer from "@mui/material/Drawer";
 import { styled } from "@mui/material";
 import { openedMixin, closedMixin } from "./layout";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface DrawerNavProps {
   toggleOpen: () => any;
@@ -39,7 +41,7 @@ export const Drawer = styled(MuiDrawer, {
 // Interface for a Drawer Nav List Item
 interface NavItem {
   title: string;
-  href: string;
+  href: string; // href to link to
   icon: JSX.Element;
 }
 
@@ -53,6 +55,13 @@ const NavItemList: NavItem[] = [
 ];
 
 export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    const path = pathname.split("/")[1];
+    return path === href.split("/")[1];
+  };
+
   return (
     <Drawer variant="permanent" open={open}>
       {/* Drawer Header */}
@@ -90,30 +99,39 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
       <Divider />
       <List>
         {NavItemList.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
+          <Link href={item.href}>
+            <ListItem
+              key={index}
+              disablePadding
+              className={isActive(item.href) ? "bg-primary bg-opacity-30" : " "}
               sx={{
-                minHeight: 48,
-                justifyContent: open ? "initial" : "center",
-                px: 2.5,
+                display: "block",
               }}
             >
-              <ListItemIcon
-                className="text-vuwGreen"
+              <ListItemButton
                 sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.title}
-                sx={{ opacity: open ? 1 : 0 }}
-              />
-            </ListItemButton>
-          </ListItem>
+                <ListItemIcon
+                  className="text-vuwGreen"
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.title}
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </Link>
         ))}
       </List>
     </Drawer>
