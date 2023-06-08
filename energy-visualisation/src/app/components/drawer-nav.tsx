@@ -7,6 +7,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import HomeIcon from "@mui/icons-material/Home";
+import EyeIcon from "@mui/icons-material/RemoveRedEye";
+import EarthIcon from "@mui/icons-material/Public";
+import FlagIcon from "@mui/icons-material/Flag";
+import GroupIcon from "@mui/icons-material/Workspaces";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Image from "next/image";
@@ -41,8 +45,10 @@ export const Drawer = styled(MuiDrawer, {
 // Interface for a Drawer Nav List Item
 interface NavItem {
   title: string;
-  href: string; // href to link to
+  href?: string; // href to link to
   icon: JSX.Element;
+  subitems?: NavItem[];
+  isHeading?: boolean;
 }
 
 // List of Nav Items to be displayed in the Drawer
@@ -51,6 +57,28 @@ const NavItemList: NavItem[] = [
     title: "Home",
     href: "/",
     icon: <HomeIcon />,
+  },
+  {
+    title: "Visualisations",
+    isHeading: true,
+    icon: <EyeIcon />,
+    subitems: [
+      {
+        title: "By Country",
+        href: "",
+        icon: <FlagIcon />,
+      },
+      {
+        title: "By Similarities",
+        href: "",
+        icon: <GroupIcon />,
+      },
+      {
+        title: "By Sustainability",
+        href: "",
+        icon: <EarthIcon />,
+      },
+    ],
   },
 ];
 
@@ -61,6 +89,72 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
     const path = pathname.split("/")[1];
     return path === href.split("/")[1];
   };
+
+  // Recursive function to render nested items
+  function renderNavItems(items: NavItem[], open: boolean) {
+    // Renders a Nav Item
+    function ListItemComponent({
+      item,
+      open,
+    }: {
+      item: NavItem;
+      open: boolean;
+    }) {
+      return (
+        <ListItem
+          disablePadding
+          className={
+            item.href && isActive(item.href) ? "bg-primary bg-opacity-30" : " "
+          }
+          sx={{
+            display: "block",
+          }}
+          divider={item.isHeading === true}
+        >
+          <ListItemButton
+            disableRipple
+            sx={{
+              minHeight: 48,
+              justifyContent: open ? "initial" : "center",
+              px: 2.5,
+              "&:hover": {
+                background: item.isHeading === true ? "transparent" : "",
+                cursor: item.isHeading === true ? "default" : "",
+              },
+            }}
+          >
+            <ListItemIcon
+              className="text-vuwGreen"
+              sx={{
+                minWidth: 0,
+                mr: open ? 3 : "auto",
+                justifyContent: "center",
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.title} sx={{ opacity: open ? 1 : 0 }} />
+          </ListItemButton>
+        </ListItem>
+      );
+    }
+
+    return items.map((item, index) => (
+      <React.Fragment key={index}>
+        {/* 
+          If the item has a href, wrap it in a Link component
+        */}
+        {item.href ? (
+          <Link href={item.href}>
+            <ListItemComponent item={item} open={open} />
+          </Link>
+        ) : (
+          <ListItemComponent item={item} open={open} />
+        )}
+        {item.subitems && renderNavItems(item.subitems, open)}
+      </React.Fragment>
+    ));
+  }
 
   return (
     <Drawer variant="permanent" open={open}>
@@ -75,6 +169,7 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
           />
         </div>
       </div>
+      {/* Open and Close Menu Button */}
       <ListItem key={"hamburger"} disablePadding sx={{ display: "block" }}>
         <ListItemButton
           onClick={toggleOpen}
@@ -97,42 +192,9 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
         </ListItemButton>
       </ListItem>
       <Divider />
+      {/* Links */}
       <List>
-        {NavItemList.map((item, index) => (
-          <Link href={item.href}>
-            <ListItem
-              key={index}
-              disablePadding
-              className={isActive(item.href) ? "bg-primary bg-opacity-30" : " "}
-              sx={{
-                display: "block",
-              }}
-            >
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  className="text-vuwGreen"
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.title}
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </Link>
-        ))}
+        <List>{renderNavItems(NavItemList, open)}</List>
       </List>
     </Drawer>
   );
