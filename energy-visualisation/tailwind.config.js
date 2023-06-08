@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -7,7 +8,7 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // custom colors
+      // custom colors for tailwind
       colors: {
         primary: "#A5DBA3",
         vuwGreen: "#0D4C38",

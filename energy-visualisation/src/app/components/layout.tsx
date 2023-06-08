@@ -7,6 +7,9 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import DrawerNav from "./drawer-nav";
 import TopAppBar from "./top-app-bar";
+import { ThemeContext, ThemeProvider } from "../contexts/theme-context";
+import { useContext } from "react";
+import { useTheme } from "@mui/material/styles";
 
 // Fixed width of the Drawer
 const drawerWidth = 240;
@@ -47,7 +50,7 @@ const AppBar = styled(MuiAppBar, {
 // Styles for the Drawer when open
 export const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
-  transition: theme.transitions.create("width", {
+  transition: theme.transitions.create(["width", "background-color"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
   }),
@@ -56,7 +59,7 @@ export const openedMixin = (theme: Theme): CSSObject => ({
 
 // Styles for the Drawer when closed
 export const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create("width", {
+  transition: theme.transitions.create(["width", "background-color"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
@@ -68,26 +71,33 @@ export const closedMixin = (theme: Theme): CSSObject => ({
 });
 
 // Component which wraps main content
-// Includes the Top App Bar and Drawer Navigation 
+// Includes the Top App Bar and Drawer Navigation
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
+  const { theme } = useContext(ThemeContext);
+  const muiTheme = useTheme();
 
   const toggleOpen = () => {
     setOpen(!open);
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <TopAppBar className="h-24" />
-      </AppBar>
+    <ThemeProvider>
+      <Box sx={{ display: "flex" }}>
+        <CssBaseline />
+        <AppBar
+          position="fixed"
+          open={open}
+        >
+          <TopAppBar className="h-24" />
+        </AppBar>
 
-      <DrawerNav toggleOpen={toggleOpen} open={open}/>
+        <DrawerNav toggleOpen={toggleOpen} open={open} />
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        {children}
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          {children}
+        </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 }

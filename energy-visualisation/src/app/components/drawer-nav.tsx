@@ -19,6 +19,9 @@ import { styled } from "@mui/material";
 import { openedMixin, closedMixin } from "./layout";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeContext } from "../contexts/theme-context";
+import { useContext } from "react";
+import { useTheme } from "@mui/material/styles";
 
 interface DrawerNavProps {
   toggleOpen: () => any;
@@ -34,11 +37,15 @@ export const Drawer = styled(MuiDrawer, {
   boxSizing: "border-box",
   ...(open && {
     ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
+    "& .MuiDrawer-paper": {
+      ...openedMixin(theme),
+    },
   }),
   ...(!open && {
     ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
+    "& .MuiDrawer-paper": {
+      ...closedMixin(theme),
+    },
   }),
 }));
 
@@ -90,6 +97,9 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
     return path === href.split("/")[1];
   };
 
+  const { theme } = useContext(ThemeContext);
+  const muiTheme = useTheme();
+
   // Recursive function to render nested items
   function renderNavItems(items: NavItem[], open: boolean) {
     // Renders a Nav Item
@@ -117,18 +127,14 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
               minHeight: 48,
               justifyContent: open ? "initial" : "center",
               px: 2.5,
-              "&:hover": {
-                background: item.isHeading === true ? "transparent" : "",
-                cursor: item.isHeading === true ? "default" : "",
-              },
             }}
           >
             <ListItemIcon
-              className="text-vuwGreen"
               sx={{
                 minWidth: 0,
                 mr: open ? 3 : "auto",
                 justifyContent: "center",
+                color: theme === "light" ? muiTheme.palette.vuwGreen : "",
               }}
             >
               {item.icon}
@@ -162,16 +168,23 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
       <div className="h-24 bg-vuwGreen justify-center">
         <div className="flex  h-full items-center justify-center">
           <Image
-            src="/unplugged-logo.png "
+            src="/unplugged-logo.png"
             alt="Unplugged Logo"
-            width={100}
-            height={100}
+            width={150}
+            height={150}
           />
         </div>
       </div>
       {/* Open and Close Menu Button */}
-      <ListItem key={"hamburger"} disablePadding sx={{ display: "block" }}>
+      <ListItem
+        key={"hamburger"}
+        disablePadding
+        sx={{
+          display: "block",
+        }}
+      >
         <ListItemButton
+          disableRipple
           onClick={toggleOpen}
           sx={{
             minHeight: 48,
@@ -180,18 +193,18 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
           }}
         >
           <ListItemIcon
-            className="text-vuwGreen"
             sx={{
               minWidth: 0,
               mr: open ? 3 : "auto",
               justifyContent: "center",
+              color: theme === "light" ? muiTheme.palette.vuwGreen : "",
             }}
           >
             <MenuIcon />
           </ListItemIcon>
         </ListItemButton>
       </ListItem>
-      <Divider />
+      <Divider className="dark:bottom-1 dark:border-b-white dark:opacity-[0.18]" />
       {/* Links */}
       <List>
         <List>{renderNavItems(NavItemList, open)}</List>
