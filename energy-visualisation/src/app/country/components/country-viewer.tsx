@@ -11,9 +11,15 @@ interface CountryViewerProps {
 export default function CountryViewer({ countryName }: CountryViewerProps) {
   const { countryData } = useContext(CountryDataContext);
 
-  const [selectedYear, setSelectedYear] = useState<number>(
-    countryData[countryName]?.length - 1
-  );
+  const [selectedYear, setSelectedYear] = useState<number>(0);
+
+  useEffect(() => {
+    if (countryData[countryName]?.length > 0) {
+      setSelectedYear(
+        countryData[countryName]?.[countryData[countryName]?.length - 1]?.year
+      );
+    }
+  }, []);
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
@@ -40,7 +46,11 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
       <h1 className="text-2xl font-bold mb-6">{countryName}</h1>
       <div className="h-[50%] w-[75%]">
         <BarChart
-          data={countryData[countryName]?.find((d) => d.year == selectedYear)}
+          data={
+            selectedYear
+              ? countryData[countryName]?.find((d) => d.year == selectedYear)
+              : countryData[countryName]?.[countryData[countryName]?.length - 1]
+          }
           max={calculateMaxWatts(countryData[countryName])}
         />
         {countryData[countryName] && countryData[countryName].length > 0 ? (
