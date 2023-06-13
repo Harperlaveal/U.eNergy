@@ -28,7 +28,7 @@ export default function BarChart({ data, max }: BarChartProps) {
     const margin = { top: 20, right: 20, bottom: 50, left: 100 };
 
     const xScale = scaleLinear()
-      .domain([0, max * 50])
+      .domain([0, max])
       .range([margin.left, width - margin.right]);
 
     const yScale = scaleBand()
