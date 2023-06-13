@@ -16,6 +16,14 @@
 import React, { use, useEffect } from 'react';
 import * as d3 from 'd3';
 
+// type script string variable called year
+const year: string = '2022';
+
+/**
+ * An array of strings that represent the different energy production methods
+ */
+const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
+
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => { 
 
@@ -30,15 +38,19 @@ export const SimilarCountriesPage = () => {
         d3.csv("data/data.csv").then(data => {
             console.log(data);
 
-            container.append('h2').text("Countries with similar energy generation methods")
-            .append('svg')
-            .attr('width', 500)
-            .attr('height', 500)
-            .append('circle')
-            .attr('cx', 100)
-            .attr('cy', 100)
-            .attr('r', 50)
-            .style('fill', 'blue');
+            // filter data to only include countries with the same energy generation methods
+            const dataFromYear = data.filter(d => d.YEAR === year);
+            // map the filtered data to PRODUCT and remove duplicates
+            const products = dataFromYear.map(d => d.PRODUCT).filter((value, index, self) => self.indexOf(value) === index);
+            // map the dataFromYear to COUNTRY and remove duplicates
+            const countries = dataFromYear.map(d => d.COUNTRY).filter((value, index, self) => self.indexOf(value) === index);
+            // remove any elements from filteredData that are not in productionMethods
+            const instances = dataFromYear.filter(d => productionMethods.includes(String(d.PRODUCT)));
+            // log instances
+            console.log(instances);
+
+            
+
         });
     },[ ] /*This argument causes this function to be called once*/);
 
