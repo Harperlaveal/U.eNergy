@@ -52,7 +52,6 @@ export const SimilarCountriesPage = () => {
     // This function is called once when the page loads, it runs on the client browser.
     useEffect(() => {
 
-        const container = d3.select("#visualization");
         // Use the D3 library to load the data file
         d3.csv("data/data.csv").then(data => {
             // console.log(data); // sanity check 
@@ -147,7 +146,7 @@ export const SimilarCountriesPage = () => {
 
             console.log(edges);
 
-            // time to make the d3 force simulation graph
+            // time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork)
 
             const width: number = 1000;
             const height: number = 1000;
@@ -159,10 +158,49 @@ export const SimilarCountriesPage = () => {
                 return {source: String(edge.source), target: String(edge.target), value: Number(edge.value)} as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
             });
 
+            const simulation = d3.forceSimulation(nodes).
+                force("link", d3.forceLink(links).id((d: any) => d.id)).
+                force("charge", d3.forceManyBody()).
+                force("center", d3.forceCenter(width / 2, height / 2)).on("tick", ticked);
 
+            const container = d3.select("#visualization");
+            const svg = container.append("svg").
+                attr("viewBox", [0, 0, width, height]).
+                attr("width", width).
+                attr("height", height).
+                attr("style", "max-width: 100%; height: auto;");
+            
+            const link = svg.append("g").
+                attr("stroke", "#999").
+                attr("stroke-opacity", 0.6).
+                selectAll("line").
+                data(links).
+                join("line").
+                attr("stroke-width", (d: any) => Math.sqrt(d.value));
 
-            const simulation = d3.forceSimulation(nodes);
+            const node = svg.append("g").
+                attr("stroke", "#fff").
+                attr("stroke-width", 1.5).
+                selectAll("circle").
+                data(nodes).
+                join("circle").
+                attr("r", 5).
+                attr("fill", (d: any) => productionColors[d.group]);
 
+            node.append("title").
+                text((d: any) => d.id);
+
+            function ticked() {
+                link.
+                    attr("x1", (d: any) => d.source.x).
+                    attr("y1", (d: any) => d.source.y).
+                    attr("x2", (d: any) => d.target.x).
+                    attr("y2", (d: any) => d.target.y);
+
+                node.
+                    attr("cx", (d: any) => d.x).
+                    attr("cy", (d: any) => d.y);
+            }
 
         });
     },[ ] /*This argument causes this function to be called once*/);
