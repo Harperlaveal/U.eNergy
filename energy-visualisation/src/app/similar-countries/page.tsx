@@ -38,9 +38,9 @@ export const SimilarCountriesPage = () => {
         d3.csv("data/data.csv").then(data => {
             console.log(data);
 
-            // filter data to only include countries with the same energy generation methods
+            // filter data to only include instances from the target year
             const dataFromYear = data.filter(d => d.YEAR === year);
-            // map the filtered data to PRODUCT and remove duplicates
+            // map the dataFromYear to PRODUCT and remove duplicates
             const products = dataFromYear.map(d => d.PRODUCT).filter((value, index, self) => self.indexOf(value) === index);
             // map the dataFromYear to COUNTRY and remove duplicates
             const countries = dataFromYear.map(d => d.COUNTRY).filter((value, index, self) => self.indexOf(value) === index);
