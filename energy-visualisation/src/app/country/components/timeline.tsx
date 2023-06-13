@@ -1,8 +1,6 @@
-"use client";
-
 import React, { useState } from "react";
 import { EnergyProductionData } from "../interfaces";
-import ReactSlider from "react-slider";
+import Slider from "@mui/material/Slider";
 
 interface TimelineProps {
   data: EnergyProductionData[];
@@ -12,30 +10,52 @@ interface TimelineProps {
 export default function Timeline({ data, onYearChange }: TimelineProps) {
   const [value, setValue] = useState(data[0].year);
 
-  const handleChange = (newValue: number | null | Array<number | null>) => {
+  const handleChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
       setValue(newValue);
       onYearChange(newValue);
     }
   };
 
+  const totalYears = data[data.length - 1].year - data[0].year;
+
   return (
-    <div className="mt-8 w-full">
-      <ReactSlider
-        className="h-2 rounded-md bg-gray-300"
-        thumbClassName="w-4 h-4 bg-blue-500 rounded-full focus:outline-none transition-all duration-200"
-        trackClassName="h-2 bg-blue-500 rounded-md"
-        min={data[0].year}
-        max={data[data.length - 1].year}
+    <div className="mt-8 w-full relative">
+      <Slider
         value={value}
         onChange={handleChange}
+        min={data[0].year}
+        max={data[data.length - 1].year}
+        sx={{
+          "& .MuiSlider-thumb": {
+            transition: "left 0.3s ease-in-out",
+            "&:not(.MuiSlider-active)": {
+              transition: "left 0.3s ease-in-out",
+            },
+          },
+          "& .MuiSlider-track": {
+            transition: "width 0.3s ease-in-out",
+            "&:not(.MuiSlider-active)": {
+              transition: "width  0.3s ease-in-out",
+            },
+          },
+        }}
       />
-      <div className="flex justify-between text-xs mt-2">
-        {data.map((d) => (
-          <span key={d.year}>{d.year}</span>
+      <div className="flex justify-between text-xs w-full">
+        {data.map((d, i) => (
+          <span
+            key={d.year}
+            style={{
+              position: "absolute",
+              left: `${((d.year - data[0].year) / totalYears) * 100}%`,
+              transform: "translateX(-50%)",
+            }}
+          >
+            {d.year}
+          </span>
         ))}
       </div>
-      <div className="text-center mt-2">{value}</div>
+      <div className="text-center mt-5">{value}</div>
     </div>
   );
 }
