@@ -7,3 +7,9 @@ export interface EnergySourceProduction {
   source: string;
   watts: number;
 }
+
+export interface Country {
+  name: string;
+  code: string;
+}
+
