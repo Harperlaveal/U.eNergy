@@ -1,72 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
+import { select, scaleBand, scaleLinear, max } from "d3";
 import { EnergyProductionData } from "../interfaces";
-import { Bar } from "react-chartjs-2";
-import { CategoryScale, ChartType } from "chart.js";
-import Chart from "chart.js/auto";
-
-Chart.register(CategoryScale);
 
 interface BarChartProps {
   data?: EnergyProductionData;
-  max: number;
 }
 
-export default function BarChart({ data, max }: BarChartProps) {
-  if (!data) {
-    return null;
-  }
-
-  const [chartData, setChartData] = useState({
-    labels: [] as string[],
-    datasets: [] as any[],
-  });
+export default function BarChart({ data }: BarChartProps) {
+  const svgRef = useRef(null);
 
   useEffect(() => {
-    if (data) {
-      setChartData({
-        labels: data.production.map((p) => p.source),
-        datasets: [
-          {
-            label: `Energy Production in ${data.year}`,
-            data: data.production.map((p) => p.watts),
-            backgroundColor: "rgba(75,192,192,0.6)",
-            borderColor: "rgba(75,192,192,1)",
-            borderWidth: 1,
-          },
-        ],
-      });
-    }
+    if (!data || !svgRef.current) return;
+
+    const svg = select(svgRef.current);
+
+    const width = 500;
+    const height = 500;
+
+    const xScale = scaleBand()
+      .domain(data.production.map((d) => d.source))
+      .range([0, width])
+      .padding(0.2);
+
+    const yScale = scaleLinear()
+      .domain([0, max(data.production, (d) => d.watts) as number])
+      .range([height, 0]);
+
+    svg
+      .selectAll("rect")
+      .data(data.production)
+      .join("rect")
+      .attr("x", (d) => xScale(d.source) || 0)
+      .attr("y", (d) => yScale(d.watts))
+      .attr("width", xScale.bandwidth())
+      .attr("height", (d) => height - yScale(d.watts))
+      .attr("fill", "steelblue");
   }, [data]);
 
-  const options = {
-    indexAxis: "y" as "y",
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: "Watts Produced",
-        },
-        barPercentage: 0.4,
-        min: 0,
-        max: max + 100,
-      },
-      y: {
-        title: {
-          display: true,
-          text: "Energy Production Method",
-        },
-      },
-    },
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-      duration: 0,
-    },
-  };
-
   return (
-    <div className="w-full h-full">
-      <Bar data={chartData} options={options} />
-    </div>
+    <svg ref={svgRef} width={500} height={500}>
+      <g className="x-axis" />
+      <g className="y-axis" />
+    </svg>
   );
 }
