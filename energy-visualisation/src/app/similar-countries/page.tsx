@@ -30,11 +30,11 @@ export const SimilarCountriesPage = () => {
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
 
-    // Use the D3 library to load the data file
+    // This function is called once when the page loads, it runs on the client browser.
     useEffect(() => {
 
         const container = d3.select("#visualization");
-
+        // Use the D3 library to load the data file
         d3.csv("data/data.csv").then(data => {
             console.log(data);
 
