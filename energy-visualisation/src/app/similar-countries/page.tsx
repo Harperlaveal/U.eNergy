@@ -24,6 +24,27 @@ const year: string = '2022';
  */
 const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
 
+/**
+ * An array of colors that represent the different energy production methods
+ */
+const productionColors: string[] = ["#1F77B4", "#FEF502", "#F4BF3A", "#D1F1F9", "#79E381", "#DE2A2A", "#000000", "#6A4848"];
+
+/**
+ * A mapping from energy production method to color array index
+ */
+const productionColorMap: Map<string, number> = new Map([
+    ["Hydro", 0],
+    ["Nuclear", 1],
+    ["Solar", 2],
+    ["Wind", 3],
+    ["Other renewables", 4],
+    ["Natural gas", 5],
+    ["Coal", 6],
+    ["Oil", 7]
+]);
+
+const color = d3.scaleOrdinal(productionColors);
+
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => { 
 
@@ -33,10 +54,12 @@ export const SimilarCountriesPage = () => {
     // This function is called once when the page loads, it runs on the client browser.
     useEffect(() => {
 
+        console.log(color);
+
         const container = d3.select("#visualization");
         // Use the D3 library to load the data file
         d3.csv("data/data.csv").then(data => {
-            console.log(data);
+            // console.log(data); // sanity check 
 
             // filter data to only include instances from the target year
             const dataFromYear = data.filter(d => d.YEAR === year);
@@ -64,12 +87,16 @@ export const SimilarCountriesPage = () => {
                         biggestMethod = method;
                     }
                 });
-                return {country: country, biggestProducer: biggestMethod, amount: amount};
+
+                var colorIndex: number = Number(productionColorMap.get(biggestMethod));
+
+                return {country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex]};
             }
             );
             console.log(countryTotals);
             
             // At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph
+
 
         });
     },[ ] /*This argument causes this function to be called once*/);
