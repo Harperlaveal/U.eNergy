@@ -60,7 +60,7 @@ export default function BarChart({ data, max }: BarChartProps) {
     responsive: true,
     maintainAspectRatio: false,
     animation: {
-      duration: 1000,
+      duration: 0,
     },
   };
 
