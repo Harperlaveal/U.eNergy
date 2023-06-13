@@ -14,12 +14,19 @@
 
 // import the react library 
 import React, { use, useEffect } from 'react';
+import * as d3 from 'd3';
 
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => { 
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
+
+    // Use the D3 library to load the data file
+    useEffect(() => {
+        d3.csv("data/countries.csv").then(data => {
+            console.log(data);
+        });
 
     return (
       <div>
