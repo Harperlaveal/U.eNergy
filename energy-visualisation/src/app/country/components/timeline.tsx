@@ -8,7 +8,7 @@ interface TimelineProps {
 }
 
 export default function Timeline({ data, onYearChange }: TimelineProps) {
-  const [value, setValue] = useState(data[0].year);
+  const [value, setValue] = useState(data[data.length - 1].year);
 
   const handleChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
