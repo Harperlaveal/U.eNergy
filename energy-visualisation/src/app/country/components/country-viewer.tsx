@@ -9,13 +9,15 @@ interface CountryViewerProps {
 }
 
 export default function CountryViewer({ countryName }: CountryViewerProps) {
-  const [selectedYear, setSelectedYear] = useState<number>(0);
+  const { countryData } = useContext(CountryDataContext);
+
+  const [selectedYear, setSelectedYear] = useState<number>(
+    countryData[countryName]?.length - 1
+  );
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
   };
-
-  const { countryData } = useContext(CountryDataContext);
 
   const calculateMaxWatts = (data: EnergyProductionData[]) => {
     let max = 0;
@@ -29,8 +31,8 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
     return max;
   };
 
-  if(countryData[countryName] === undefined) {
-    return <></>
+  if (countryData[countryName] === undefined) {
+    return <></>;
   }
 
   return (
@@ -38,7 +40,7 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
       <h1 className="text-2xl font-bold mb-6">{countryName}</h1>
       <div className="h-[50%] w-[75%]">
         <BarChart
-          data={countryData[countryName]?.[countryData[countryName]?.length - 1]}
+          data={countryData[countryName]?.find((d) => d.year == selectedYear)}
           max={calculateMaxWatts(countryData[countryName])}
         />
         {countryData[countryName] && countryData[countryName].length > 0 ? (

@@ -8,7 +8,7 @@ interface TimelineProps {
 }
 
 export default function Timeline({ data, onYearChange }: TimelineProps) {
-  const [value, setValue] = useState(data[data.length - 1].year);
+  const [value, setValue] = useState<number>(data[data.length - 1].year);
 
   const handleChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
@@ -24,8 +24,8 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
       <Slider
         value={value}
         onChange={handleChange}
-        min={data[0].year}
-        max={data[data.length - 1].year}
+        min={parseInt(data[0].year.toString())}
+        max={parseInt(data[data.length - 1].year.toString())}
         sx={{
           "& .MuiSlider-thumb": {
             transition: "left 0.3s ease-in-out",
