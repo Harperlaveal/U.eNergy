@@ -24,13 +24,28 @@ export const SimilarCountriesPage = () => {
 
     // Use the D3 library to load the data file
     useEffect(() => {
-        d3.csv("data/countries.csv").then(data => {
+
+        const container = d3.select("#visualization");
+
+        d3.csv("data/data.csv").then(data => {
             console.log(data);
+
+            container.append('h2').text("Countries with similar energy generation methods")
+            .append('svg')
+            .attr('width', 500)
+            .attr('height', 500)
+            .append('circle')
+            .attr('cx', 100)
+            .attr('cy', 100)
+            .attr('r', 50)
+            .style('fill', 'blue');
         });
+    },[ ] /*This argument causes this function to be called once*/);
 
     return (
       <div>
           <h1>Countries</h1>
+          <div id="visualization"></div>
           {
             
           }
