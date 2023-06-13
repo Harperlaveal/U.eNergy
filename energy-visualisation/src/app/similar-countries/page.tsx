@@ -41,15 +41,35 @@ export const SimilarCountriesPage = () => {
             // filter data to only include instances from the target year
             const dataFromYear = data.filter(d => d.YEAR === year);
             // map the dataFromYear to PRODUCT and remove duplicates
-            const products = dataFromYear.map(d => d.PRODUCT).filter((value, index, self) => self.indexOf(value) === index);
+            const products = dataFromYear.map(d => String(d.PRODUCT)).filter((value, index, self) => self.indexOf(value) === index);
             // map the dataFromYear to COUNTRY and remove duplicates
-            const countries = dataFromYear.map(d => d.COUNTRY).filter((value, index, self) => self.indexOf(value) === index);
+            const countries = dataFromYear.map(d => String(d.COUNTRY)).filter((value, index, self) => self.indexOf(value) === index);
             // remove any elements from filteredData that are not in productionMethods
             const instances = dataFromYear.filter(d => productionMethods.includes(String(d.PRODUCT)));
             // log instances
             console.log(instances);
 
+            // Current goal is to find the top generation method for each country in the given year to determine what color the node should be in the graph
+
+            // for each country iterate over instances and create a new object with the country name and the sum of the values for each production method
+            const countryTotals = countries.map(country => {
+                const countryInstances = instances.filter(d => String(d.COUNTRY) === country);
+                var amount: number = Number.MIN_VALUE;
+                var biggestMethod: string = "";
+                productionMethods.forEach(method => {
+                    const methodInstances = countryInstances.filter(d => String(d.PRODUCT) === method);
+                    const methodTotal = methodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    if (methodTotal > amount) {
+                        amount = methodTotal;
+                        biggestMethod = method;
+                    }
+                });
+                return {country: country, biggestProducer: biggestMethod, amount: amount};
+            }
+            );
+            console.log(countryTotals);
             
+            // At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph
 
         });
     },[ ] /*This argument causes this function to be called once*/);
