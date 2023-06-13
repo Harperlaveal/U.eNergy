@@ -46,7 +46,7 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-[75%]">
+    <div className="flex flex-col items-center justify-center h-screen w-full">
       <h1 className="text-2xl font-bold mb-6">{countryName}</h1>
       <div className="h-[50%] w-[75%]">
         <BarChart

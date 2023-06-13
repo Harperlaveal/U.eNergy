@@ -9,7 +9,9 @@ export default function CountryPage({ params }: { params: { id: string } }) {
   return (
     <div className="flex">
       <CountryDataProvider>
-        <CountryViewer countryName={capitalizeFirstLetter(decodeURI(id))} />
+        <div className="w-[75%]">
+          <CountryViewer countryName={capitalizeFirstLetter(decodeURI(id))} />
+        </div>
         <div className="fixed right-24 top-32">
           <CountrySelector id={id} />
         </div>
