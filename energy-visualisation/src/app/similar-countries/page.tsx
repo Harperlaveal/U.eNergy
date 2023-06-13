@@ -43,8 +43,6 @@ const productionColorMap: Map<string, number> = new Map([
     ["Oil", 7]
 ]);
 
-const color = d3.scaleOrdinal(productionColors);
-
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => { 
 
@@ -53,8 +51,6 @@ export const SimilarCountriesPage = () => {
 
     // This function is called once when the page loads, it runs on the client browser.
     useEffect(() => {
-
-        console.log(color);
 
         const container = d3.select("#visualization");
         // Use the D3 library to load the data file
@@ -70,7 +66,7 @@ export const SimilarCountriesPage = () => {
             // remove any elements from filteredData that are not in productionMethods
             const instances = dataFromYear.filter(d => productionMethods.includes(String(d.PRODUCT)));
             // log instances
-            console.log(instances);
+            // console.log(instances);
 
             // Current goal is to find the top generation method for each country in the given year to determine what color the node should be in the graph
 
@@ -90,12 +86,82 @@ export const SimilarCountriesPage = () => {
 
                 var colorIndex: number = Number(productionColorMap.get(biggestMethod));
 
-                return {country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex]};
+                return {country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex], id: country, group: colorIndex};
             }
             );
-            console.log(countryTotals);
+            // console.log(countryTotals);
             
             // At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph
+            var edges: any[]= [];
+
+            /**
+             * Use the euclidean distance formula to calculate the similarity between two countries. Copilot is a G.
+             * @param countryA 
+             * @param countryB 
+             * @returns The euclidean distance between countryA and countryB
+             */
+            const calculateCountrySimilarity = (countryA: string, countryB: string) => {
+                var similarity: number = 0;
+                // for each energy production method
+                productionMethods.forEach(method => {
+                    // get the instances for countryA and countryB
+                    const countryAInstances = instances.filter(d => String(d.COUNTRY) === countryA);
+                    const countryBInstances = instances.filter(d => String(d.COUNTRY) === countryB);
+                    // get the instances for countryA and countryB for the current method
+                    const countryAMethodInstances = countryAInstances.filter(d => String(d.PRODUCT) === method);
+                    const countryBMethodInstances = countryBInstances.filter(d => String(d.PRODUCT) === method);
+                    // get the total amount of energy produced for countryA and countryB for the current method
+                    const countryAMethodTotal = countryAMethodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    const countryBMethodTotal = countryBMethodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    // calculate the difference between the two countries for the current method
+                    const difference: number = countryAMethodTotal - countryBMethodTotal;
+                    // square the difference
+                    const squaredDifference: number = Math.pow(difference, 2);
+                    // calculate the range of the current method
+                    const range: number = Math.max(countryAMethodTotal, countryBMethodTotal) - Math.min(countryAMethodTotal, countryBMethodTotal);
+                    if (range === 0 || squaredDifference === 0) {
+                        // skip this method
+                        return;
+                    }
+                    // divide the squared difference by the squared range
+                    const normalizedDifference: number = squaredDifference / Math.pow(range, 2);
+                    // add the normalized difference to the similarity
+                    similarity += normalizedDifference;
+                });
+                return similarity;
+            };
+            // var temp:number = 0/100; // 0
+            // var temp2:number = 0/0; // NaN
+            // var temp3:number = 10/0; // Infinity
+            countries.forEach(countryA => {
+                countries.forEach(countryB => {
+                    // if country a is the same as country b then skip
+                    if (countryA === countryB) {
+                        return;
+                    }
+                    var weight: number = calculateCountrySimilarity(countryA, countryB);
+                    var edge: Object = {source: countryA, target: countryB, value: weight};
+                    edges.push(edge);
+                });
+            });
+
+            console.log(edges);
+
+            // time to make the d3 force simulation graph
+
+            const width: number = 1000;
+            const height: number = 1000;
+            // convert the country instances to nodes
+            const nodes: d3.SimulationNodeDatum[] = countryTotals.map(country => {
+                return {id: String(country.country), group: Number(country.group)} as d3.SimulationNodeDatum;
+            });
+            const links: d3.SimulationLinkDatum<d3.SimulationNodeDatum>[] = edges.map(edge => {
+                return {source: String(edge.source), target: String(edge.target), value: Number(edge.value)} as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
+            });
+
+
+
+            const simulation = d3.forceSimulation(nodes);
 
 
         });
