@@ -9,6 +9,7 @@
  * The website will be available at http://localhost:3000/similar-countries
  * 
  */
+// This statement causes our code to run in the client web browser instead of the server. Console log messages appear in the web browser.
 "use client";
 
 // import the react library 
@@ -19,13 +20,6 @@ export const SimilarCountriesPage = () => {
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
-
-    // use the useEffect hook to log a message to the console inside of the web browser
-    /*useEffect(() => {
-        console.log("Hello from SimilarCountriesPage browser");
-    }, []);*/
-
-
 
     return (
       <div>
