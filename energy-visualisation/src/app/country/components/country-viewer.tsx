@@ -26,14 +26,18 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
   };
 
   const calculateMaxWatts = (data: EnergyProductionData[]) => {
-    let max = 0;
+    console.log("calc -> ");
+    console.log(data);
+    let max: number = 0;
     data.forEach((d) => {
       d.production.forEach((p) => {
-        if (p.watts > max) {
-          max = p.watts;
+        const wattsAsNumber = Number(p.watts);
+        if (wattsAsNumber > max) {
+          max = wattsAsNumber;
         }
       });
     });
+    console.log("max: -> " + max);
     return max;
   };
 

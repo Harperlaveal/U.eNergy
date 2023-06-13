@@ -71,7 +71,7 @@ export default function BarChart({ data, max }: BarChartProps) {
             .append("rect")
             .attr("x", margin.left)
             .attr("y", (d) => yScale(d.source) || 0)
-            .attr("width", (d) => xScale(d.watts) - margin.left)
+            .attr("width", (d) => xScale(d.watts))
             .attr("height", yScale.bandwidth())
             .attr("fill", "steelblue")
             .call((enter) =>
@@ -79,7 +79,7 @@ export default function BarChart({ data, max }: BarChartProps) {
                 .transition(t)
                 .delay((d, i) => i * 100)
                 .attr("x", margin.left)
-                .attr("width", (d) => xScale(d.watts) - margin.left)
+                .attr("width", (d) => xScale(d.watts))
             ),
         (update) =>
           update.call((update) =>
@@ -87,7 +87,7 @@ export default function BarChart({ data, max }: BarChartProps) {
               .transition(t)
               .attr("y", (d) => yScale(d.source) || 0)
               .attr("height", yScale.bandwidth())
-              .attr("width", (d) => xScale(d.watts) - margin.left)
+              .attr("width", (d) => xScale(d.watts))
           ),
         (exit) =>
           exit.call((exit) =>
@@ -98,7 +98,10 @@ export default function BarChart({ data, max }: BarChartProps) {
 
   return (
     <div ref={wrapperRef} style={{ width: "100%" }}>
-      <svg ref={svgRef} style={{ width: "100%", height: "500px" }}>
+      <svg
+        ref={svgRef}
+        style={{ width: "100%", height: "500px", overflow: "visible" }}
+      >
         <g className="x-axis" />
         <g className="y-axis" />
       </svg>
