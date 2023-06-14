@@ -8,6 +8,7 @@
  * 
  * The website will be available at http://localhost:3000/similar-countries
  * 
+ * @author Benjamin Sanson
  */
 // This statement causes our code to run in the client web browser instead of the server. Console log messages appear in the web browser.
 "use client";
