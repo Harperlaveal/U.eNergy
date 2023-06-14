@@ -43,15 +43,6 @@ const productionColorMap: Map<string, number> = new Map([
     ["Oil", 7]
 ]);
 
-/**
- * Reference to the information popup so it can be deleted by other code
- */
-let countryPopup: d3.Selection<SVGElement, unknown, HTMLElement, any> = null as any;
-/**
- * flag to stop the div being deleted by the click event that created it
- */
-let spawnedThisClick: boolean = false;
-
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => {
 
@@ -60,20 +51,16 @@ export const SimilarCountriesPage = () => {
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
 
-    // Delete the details on demand if the user clicks outside of the popup
-    document.addEventListener("click", (event) => {
-        if (countryPopup !== null) {
-            // @ts-ignore
-            if (!countryPopup.node().contains(event.target as any)
-                && !spawnedThisClick) {
-                // remove the popup 
-                countryPopup.remove();
-                countryPopup = null as any;
-            } else {
-                spawnedThisClick = false;
-            }
+    // hide the details on demand if the user clicks outside of the popup
+    document.getElementById("visualization")?.addEventListener("click", (event) => {
+        // check if we clicked inside the country details popup
+        var clicked = event.target as HTMLElement;
+        var typeOfClicked: string = clicked.tagName;
+        if (typeOfClicked !== "circle") {
+            setSelectedCountry("");
         }
-    });
+    }
+    );
 
     // This function is called once when the page loads, it runs on the client browser.
     useEffect(() => {
@@ -306,33 +293,6 @@ export const SimilarCountriesPage = () => {
                 on("click", (event: any, d: any) => {
                     setSelectedCountry(d.id);
                     console.log(d);
-                    if (countryPopup) {
-                        countryPopup.remove();
-                    }
-                    const popup = container
-                        .append("div")
-                        .attr("class", "popup")
-                        .style("left", d.x + "px")
-                        .style("top", d.y + "px");
-
-                    const bulletPoint: string = "• ";
-                    const newLine: string = "\n";
-                    var text = bulletPoint + d.id + newLine
-                        + bulletPoint + "Total Energy: " + d.energyTotal + " TWh" + newLine
-                        + bulletPoint + "Largest Producer: " + d.largestMethod;
-
-                    popup.text(text);
-
-                    popup.append("span")
-                        .attr("class", "close-button")
-                        .text("X")
-                        .on("click", () => {
-                            popup.remove();
-                            countryPopup = null as any;
-                        });
-                    // @ts-ignore
-                    countryPopup = popup;
-                    spawnedThisClick = true;
                 });
 
             node.append("title").
@@ -380,7 +340,7 @@ export const SimilarCountriesPage = () => {
     return (
         <div className="h-screen flex flex-row w-full pt-24">
             {/*the pop up component*/}
-            <div>
+            <div id="country-popup">
                 {selectedCountry}
             </div>
             <div className="flex flex-col">
