@@ -84,12 +84,16 @@ export const SimilarCountriesPage = () => {
                 });
 
                 var colorIndex: number = Number(productionColorMap.get(biggestMethod));
+                var totalEnergy: number = countryInstances.reduce((a, b) => a + Number(b.VALUE), 0);
 
-                return {country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex], id: country, group: colorIndex};
+                return {country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex], id: country, group: colorIndex, totalEnergy: totalEnergy};
             }
             );
-            // console.log(countryTotals);
+            console.log(countryTotals); // Country totals ends up being used as the nodes in the graph later in this function.
             
+            const largestCountryTotal = countryTotals.reduce((a, b) => a.amount > b.amount ? a : b);
+            const smallestCountryTotal = countryTotals.reduce((a, b) => a.amount < b.amount ? a : b);
+
             // At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph
             var edges: any[]= [];
 
@@ -99,7 +103,7 @@ export const SimilarCountriesPage = () => {
              * @param countryB 
              * @returns The euclidean distance between countryA and countryB
              */
-            const calculateCountrySimilarity = (countryA: string, countryB: string) => {
+            const calculateCountrySimilarityEuclidean = (countryA: string, countryB: string) => {
                 var similarity: number = 0;
                 // for each energy production method
                 productionMethods.forEach(method => {
@@ -129,27 +133,103 @@ export const SimilarCountriesPage = () => {
                 });
                 return similarity;
             };
+
+            /**
+             * Checks if two countries share any energy generation methods in common
+             * @param countryA 
+             * @param countryB 
+             * @returns true if countryA and countryB share any energy generation methods in common, false otherwise
+             */
+            const checkForSharedGenerationMethods = (countryA: string, countryB: string) => {
+                // if country a and country b share no generation methods then skip
+                var countryAInstances = instances.filter(d => String(d.COUNTRY) === countryA);
+                var countryBInstances = instances.filter(d => String(d.COUNTRY) === countryB);
+                var countryAProducts = countryAInstances.map(d => String(d.PRODUCT)).filter((value, index, self) => self.indexOf(value) === index);
+                var countryBProducts = countryBInstances.map(d => String(d.PRODUCT)).filter((value, index, self) => self.indexOf(value) === index);
+                var sharedProducts = countryAProducts.filter(value => countryBProducts.includes(value));
+                if (sharedProducts.length === 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+
+            /**
+             * Checks if two countries share the same top energy generation method
+             * @param countryA 
+             * @param countryB 
+             * @returns true if countryA and countryB share the same top energy generation method, false otherwise
+             */
+            const checkSameTopGenerationMethod = (countryA: string, countryB: string) => {
+                var countryAInstances = countryTotals.filter(d => d.country === countryA);
+                var countryBInstances = countryTotals.filter(d => d.country === countryB);
+                var countryAProduct = countryAInstances[0].biggestProducer;
+                var countryBProduct = countryBInstances[0].biggestProducer;
+                if (countryAProduct === countryBProduct) {
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+
+            /**
+             * Countries that generated a similar amount of TWh will have larger similarity score.
+             * @param countryA 
+             * @param countryB 
+             */
+            const calculateCountrySimilarityEnergyTotal: (countryA: string, countryB: string) => number = (countryA: string, countryB: string) => {
+                // get country A from countryTotals
+                var countryAInstances = countryTotals.filter(d => d.country === countryA);
+                var countryBInstances = countryTotals.filter(d => d.country === countryB);
+                var totalEnergyA: number = countryAInstances[0].totalEnergy;
+                var totalEnergyB: number = countryBInstances[0].totalEnergy;
+                var difference: number = Math.abs(totalEnergyA - totalEnergyB);
+                var range: number = largestCountryTotal.amount - smallestCountryTotal.amount;
+                var normalizedDifference: number = difference / range;
+                return normalizedDifference;
+            };
+
+
+
             // var temp:number = 0/100; // 0
             // var temp2:number = 0/0; // NaN
             // var temp3:number = 10/0; // Infinity
+
+            // A set of countries that has already been visited
+            var visited: string[] = [];
+
             countries.forEach(countryA => {
                 countries.forEach(countryB => {
                     // if country a is the same as country b then skip
                     if (countryA === countryB) {
                         return;
                     }
-                    var weight: number = calculateCountrySimilarity(countryA, countryB);
+                    // If country B is in the visited set then skip
+                    if (visited.includes(countryB)) {
+                        return;
+                    }
+                    // if country a and country b share no generation methods then skip
+                    if (!checkForSharedGenerationMethods(countryA, countryB)) {
+                        return;
+                    }
+                    if (!checkSameTopGenerationMethod(countryA, countryB)) {
+                        return;
+                    }
+                    // var weight: number = calculateCountrySimilarityEuclidean(countryA, countryB);
+                    var weight: number = calculateCountrySimilarityEnergyTotal(countryA, countryB);
                     var edge: Object = {source: countryA, target: countryB, value: weight};
                     edges.push(edge);
                 });
+                // Add country A to the visited set
+                visited.push(countryA);
             });
 
             console.log(edges);
 
             // time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork)
 
-            const width: number = 1000;
-            const height: number = 1000;
+            const width: number = 850;
+            const height: number = 850;
             // convert the country instances to nodes
             const nodes: d3.SimulationNodeDatum[] = countryTotals.map(country => {
                 return {id: String(country.country), group: Number(country.group)} as d3.SimulationNodeDatum;
@@ -190,6 +270,13 @@ export const SimilarCountriesPage = () => {
             node.append("title").
                 text((d: any) => d.id);
 
+            // This causes a type error but I don't know how to solve it. The actual code works fine, so I'm just ignoring the error here.
+            // @ts-ignore 
+            node.call(d3.drag().
+                on("start", dragstarted).
+                on("drag", dragged).
+                on("end", dragended));
+
             function ticked() {
                 link.
                     attr("x1", (d: any) => d.source.x).
@@ -202,8 +289,25 @@ export const SimilarCountriesPage = () => {
                     attr("cy", (d: any) => d.y);
             }
 
+            function dragstarted(event: any) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            function dragged(event: any) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            function dragended(event: any) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+
         });
-    },[ ] /*This argument causes this function to be called once*/);
+    },[ ] /*This argument causes this function to be called once when the page is loaded*/);
 
     return (
       <div>
