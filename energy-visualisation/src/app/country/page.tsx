@@ -1,43 +1,33 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Autocomplete from "@mui/material/Autocomplete";
-import { TextField, Button } from "@mui/material/";
-import { Country } from "./interfaces";
-import { countries } from "./countries";
+import { Button } from "@mui/material/";
+import MainSelect from "./components/main-select";
+import { CountryDataProvider } from "./contexts/country-data-context";
 
 export default function CountryHomePage() {
   const router = useRouter();
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
-  const handleCountryChange = (_: any, value: Country | null) => {
+  const handleCountryChange = (_: any, value: string | null) => {
     setSelectedCountry(value);
   };
 
   const handleViewCountry = () => {
     if (selectedCountry) {
-      router.push(`/country/${selectedCountry.name}`);
+      router.push(`/country/${selectedCountry}`);
     }
   };
 
   return (
     <div className="flex flex-col h-screen items-center justify-center w-full space-y-4">
       <h1 className="text-3xl font-bold ">Energy Production by Country</h1>
-      <Autocomplete
-        className="w-[50%] "
-        options={countries}
-        getOptionLabel={(country) => country.name}
-        value={selectedCountry}
-        onChange={handleCountryChange}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Select Country"
-            variant="outlined"
-            fullWidth
-          />
-        )}
-      />
+      <CountryDataProvider>
+        <MainSelect
+          selectedCountry={selectedCountry}
+          handleCountryChange={handleCountryChange}
+        />
+      </CountryDataProvider>
       <Button
         variant="contained"
         color="primary"

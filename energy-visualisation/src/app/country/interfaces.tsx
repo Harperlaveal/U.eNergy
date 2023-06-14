@@ -8,11 +8,6 @@ export interface EnergySourceProduction {
   watts: number;
 }
 
-export interface Country {
-  name: string;
-  code: string;
-}
-
 export interface CSVRow {
   COUNTRY: string;
   CODE_TIME: string;
@@ -27,4 +22,3 @@ export interface CSVRow {
   previousYearToDate: number;
   share: number;
 }
-
