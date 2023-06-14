@@ -13,7 +13,7 @@
 "use client";
 
 // import the react library 
-import React, { use, useEffect } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
 // type script string variable called year
@@ -50,10 +50,12 @@ let countryPopup: d3.Selection<SVGElement, unknown, HTMLElement, any> = null as 
 /**
  * flag to stop the div being deleted by the click event that created it
  */
-let spawnedThisClick: boolean = false; 
+let spawnedThisClick: boolean = false;
 
 // export a component that has a div with header inside that says countries
-export const SimilarCountriesPage = () => { 
+export const SimilarCountriesPage = () => {
+
+    const [selectedCountry, setSelectedCountry] = useState<string>("");
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
@@ -110,16 +112,16 @@ export const SimilarCountriesPage = () => {
                 var colorIndex: number = Number(productionColorMap.get(biggestMethod));
                 var totalEnergy: number = countryInstances.reduce((a, b) => a + Number(b.VALUE), 0);
 
-                return {country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex], id: country, group: colorIndex, totalEnergy: totalEnergy};
+                return { country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex], id: country, group: colorIndex, totalEnergy: totalEnergy };
             }
             );
             console.log(countryTotals); // Country totals ends up being used as the nodes in the graph later in this function.
-            
+
             const largestCountryTotal = countryTotals.reduce((a, b) => a.amount > b.amount ? a : b);
             const smallestCountryTotal = countryTotals.reduce((a, b) => a.amount < b.amount ? a : b);
 
             // At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph
-            var edges: any[]= [];
+            var edges: any[] = [];
 
             /**
              * Use the euclidean distance formula to calculate the similarity between two countries. Copilot is a G.
@@ -241,7 +243,7 @@ export const SimilarCountriesPage = () => {
                     }
                     // var weight: number = calculateCountrySimilarityEuclidean(countryA, countryB);
                     var weight: number = calculateCountrySimilarityEnergyTotal(countryA, countryB);
-                    var edge: Object = {source: countryA, target: countryB, value: weight};
+                    var edge: Object = { source: countryA, target: countryB, value: weight };
                     edges.push(edge);
                 });
                 // Add country A to the visited set
@@ -253,16 +255,18 @@ export const SimilarCountriesPage = () => {
             // time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork)
 
             const width: number = 850;
-            const height: number = 850;
+            const height: number = 500;
             // convert the country instances to nodes
             const nodes: d3.SimulationNodeDatum[] = countryTotals.map(country => {
-                return {  id: String(country.country),
-                          group: Number(country.group),
-                          energyTotal: country.totalEnergy,
-                          largestMethod: country.biggestProducer} as d3.SimulationNodeDatum;
+                return {
+                    id: String(country.country),
+                    group: Number(country.group),
+                    energyTotal: country.totalEnergy,
+                    largestMethod: country.biggestProducer
+                } as d3.SimulationNodeDatum;
             });
             const links: d3.SimulationLinkDatum<d3.SimulationNodeDatum>[] = edges.map(edge => {
-                return {source: String(edge.source), target: String(edge.target), value: Number(edge.value)} as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
+                return { source: String(edge.source), target: String(edge.target), value: Number(edge.value) } as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
             });
 
             const radius: number = 5;
@@ -281,7 +285,7 @@ export const SimilarCountriesPage = () => {
                 attr("width", width).
                 attr("height", height).
                 attr("style", "max-width: 100%; height: auto;");
-            
+
             const link = svg.append("g").
                 attr("stroke", "#999").
                 attr("stroke-opacity", 0.6).
@@ -300,31 +304,32 @@ export const SimilarCountriesPage = () => {
                 attr("fill", (d: any) => productionColors[d.group]).
                 // Create a popup when a node is clicked with information about the node
                 on("click", (event: any, d: any) => {
+                    setSelectedCountry(d.id);
                     console.log(d);
                     if (countryPopup) {
                         countryPopup.remove();
                     }
                     const popup = container
-                    .append("div")
-                    .attr("class", "popup")
-                    .style("left", d.x + "px")
-                    .style("top", d.y + "px");
+                        .append("div")
+                        .attr("class", "popup")
+                        .style("left", d.x + "px")
+                        .style("top", d.y + "px");
 
                     const bulletPoint: string = "• ";
                     const newLine: string = "\n";
-                    var text =  bulletPoint + d.id + newLine 
-                                + bulletPoint + "Total Energy: " + d.energyTotal + " TWh" + newLine 
-                                + bulletPoint + "Largest Producer: " + d.largestMethod;
+                    var text = bulletPoint + d.id + newLine
+                        + bulletPoint + "Total Energy: " + d.energyTotal + " TWh" + newLine
+                        + bulletPoint + "Largest Producer: " + d.largestMethod;
 
                     popup.text(text);
 
                     popup.append("span")
                         .attr("class", "close-button")
                         .text("X")
-                    .on("click", () => {
-                        popup.remove();
-                        countryPopup = null as any;
-                    });
+                        .on("click", () => {
+                            popup.remove();
+                            countryPopup = null as any;
+                        });
                     // @ts-ignore
                     countryPopup = popup;
                     spawnedThisClick = true;
@@ -370,28 +375,34 @@ export const SimilarCountriesPage = () => {
             }
 
         });
-    },[ ] /*This argument causes this function to be called once when the page is loaded*/);
+    }, [] /*This argument causes this function to be called once when the page is loaded*/);
 
     return (
-      <div>
-          <h1>Countries</h1>
-          <div id="visualization"></div>
-          <div id="color-map">
-            {
-                // Add a div for each color in prductionColors
-                Object.keys(productionMethods).map((key: string) => {
-                    const methodName: string = productionMethods[Number(key)];
-                    const color: string = productionColors[Number(productionColorMap.get(methodName))];
-                    const textColor: string = methodName === "Coal" ? "white" : "black";
-                    return <div key={methodName} className="color-map-entry">
-                        <div className="color-map-color" style={{backgroundColor: color, color: textColor}}>{methodName}</div>
-                    </div>
+        <div className="h-screen flex flex-row w-full pt-24">
+            {/*the pop up component*/}
+            <div>
+                {selectedCountry}
+            </div>
+            <div className="flex flex-col">
+                <h1>Countries</h1>
+                <div id="visualization"></div>
+            </div>
+            <div id="color-map">
+                {
+                    // Add a div for each color in prductionColors
+                    Object.keys(productionMethods).map((key: string) => {
+                        const methodName: string = productionMethods[Number(key)];
+                        const color: string = productionColors[Number(productionColorMap.get(methodName))];
+                        const textColor: string = methodName === "Coal" ? "white" : "black";
+                        return <div key={methodName} className="color-map-entry">
+                            <div className="color-map-color" style={{ backgroundColor: color, color: textColor }}>{methodName}</div>
+                        </div>
+                    }
+                    )
                 }
-                )
-            }
-          </div>
-      </div>
-    ); 
+            </div>
+        </div>
+    );
 };
 
 export default SimilarCountriesPage;
