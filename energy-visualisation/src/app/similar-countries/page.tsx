@@ -99,7 +99,7 @@ export const SimilarCountriesPage = () => {
             // log instances
             // console.log(instances);
 
-            // Current goal is to find the top generation method for each country in the given year to determine what color the node should be in the graph
+// =========== Current goal is to find the top generation method for each country in the given year to determine what color the node should be in the graph ==========
 
             // for each country iterate over instances and create a new object with the country name and the sum of the values for each production method
             const countryTotals = countries.map(country => {
@@ -128,7 +128,7 @@ export const SimilarCountriesPage = () => {
             const largestCountryTotal = countryTotals.reduce((a, b) => a.amount > b.amount ? a : b);
             const smallestCountryTotal = countryTotals.reduce((a, b) => a.amount < b.amount ? a : b);
 
-            // At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph
+// ============== At this stage we want to calculate the similarity of each country to one another for the force attaction in the graph =======================
             var edges: any[] = [];
 
             /**
@@ -258,10 +258,10 @@ export const SimilarCountriesPage = () => {
 
             console.log(edges);
 
-            // time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork)
+// ================ time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork) ======================
 
-            const width: number = 650;
-            const height: number = 650;
+            const width: number = 750;
+            const height: number = 750;
             // convert the country instances to nodes
             const nodes: d3.SimulationNodeDatum[] = countryTotals.map(country => {
                 return {
@@ -271,12 +271,13 @@ export const SimilarCountriesPage = () => {
                     largestMethod: country.biggestProducer
                 } as d3.SimulationNodeDatum;
             });
+            // convert the edges to links
             const links: d3.SimulationLinkDatum<d3.SimulationNodeDatum>[] = edges.map(edge => {
                 return { source: String(edge.source), target: String(edge.target), value: Number(edge.value) } as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
             });
 
             const radius: number = 5;
-
+            // create the physics simulation
             const simulation = d3.forceSimulation(nodes).
                 force("link", d3.forceLink(links).id((d: any) => d.id)).
                 force("charge", d3.forceManyBody()).
@@ -285,13 +286,32 @@ export const SimilarCountriesPage = () => {
                 force("y", d3.forceY().y(d => Math.max(radius, Math.min(height - radius, Number(d.y))))).
                 on("tick", ticked);
 
+            // enable zooming
+            const zoom = d3.zoom().translateExtent([[0, 0], [width, height]]).scaleExtent([1, 15]).on("zoom", zoomed).on("zoom", zoomed);
+            function zoomed(event: any) {
+                // svg.attr("transform", event.transform);
+                // half the event transform values
+                event.transform.x = event.transform.x / 2;
+                event.transform.y = event.transform.y / 2;
+                svg.attr("transform", event.transform);
+                console.log(event.transform);
+            }
+
+            // Find the div to inject DOM elements into
             const container = d3.select("#visualization");
+
+            // Remove existing elements in the div
             container.selectAll("*").remove();
+
+            // Add an SVG
             const svg = container.append("svg").
                 attr("viewBox", [0, 0, width, height]).
                 attr("width", width).
                 attr("height", height).
-                attr("style", "max-width: 100%; height: auto;");
+                attr("preserveAspectRatio", "xMidYMid meet").
+                attr("style", "max-width: 100%; height: auto;").
+                // @ts-ignore
+                call(zoom);
 
             const link = svg.append("g").
                 attr("stroke", "#999").
@@ -324,7 +344,7 @@ export const SimilarCountriesPage = () => {
                 on("start", dragstarted).
                 on("drag", dragged).
                 on("end", dragended));
-
+            
             function ticked() {
                 link.
                     attr("x1", (d: any) => d.source.x).
