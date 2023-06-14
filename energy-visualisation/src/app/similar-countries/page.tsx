@@ -43,11 +43,35 @@ const productionColorMap: Map<string, number> = new Map([
     ["Oil", 7]
 ]);
 
+/**
+ * Reference to the information popup so it can be deleted by other code
+ */
+let countryPopup: d3.Selection<SVGElement, unknown, HTMLElement, any> = null as any;
+/**
+ * flag to stop the div being deleted by the click event that created it
+ */
+let spawnedThisClick: boolean = false; 
+
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => { 
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
+
+    // Delete the details on demand if the user clicks outside of the popup
+    document.addEventListener("click", (event) => {
+        if (countryPopup !== null) {
+            // @ts-ignore
+            if (!countryPopup.node().contains(event.target as any)
+                && !spawnedThisClick) {
+                // remove the popup 
+                countryPopup.remove();
+                countryPopup = null as any;
+            } else {
+                spawnedThisClick = false;
+            }
+        }
+    });
 
     // This function is called once when the page loads, it runs on the client browser.
     useEffect(() => {
@@ -232,7 +256,10 @@ export const SimilarCountriesPage = () => {
             const height: number = 850;
             // convert the country instances to nodes
             const nodes: d3.SimulationNodeDatum[] = countryTotals.map(country => {
-                return {id: String(country.country), group: Number(country.group)} as d3.SimulationNodeDatum;
+                return {  id: String(country.country),
+                          group: Number(country.group),
+                          energyTotal: country.totalEnergy,
+                          largestMethod: country.biggestProducer} as d3.SimulationNodeDatum;
             });
             const links: d3.SimulationLinkDatum<d3.SimulationNodeDatum>[] = edges.map(edge => {
                 return {source: String(edge.source), target: String(edge.target), value: Number(edge.value)} as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
@@ -270,7 +297,38 @@ export const SimilarCountriesPage = () => {
                 data(nodes).
                 join("circle").
                 attr("r", 5).
-                attr("fill", (d: any) => productionColors[d.group]);
+                attr("fill", (d: any) => productionColors[d.group]).
+                // Create a popup when a node is clicked with information about the node
+                on("click", (event: any, d: any) => {
+                    console.log(d);
+                    if (countryPopup) {
+                        countryPopup.remove();
+                    }
+                    const popup = container
+                    .append("div")
+                    .attr("class", "popup")
+                    .style("left", d.x + "px")
+                    .style("top", d.y + "px");
+
+                    const bulletPoint: string = "• ";
+                    const newLine: string = "\n";
+                    var text =  bulletPoint + d.id + newLine 
+                                + bulletPoint + "Total Energy: " + d.energyTotal + " TWh" + newLine 
+                                + bulletPoint + "Largest Producer: " + d.largestMethod;
+
+                    popup.text(text);
+
+                    popup.append("span")
+                        .attr("class", "close-button")
+                        .text("X")
+                    .on("click", () => {
+                        popup.remove();
+                        countryPopup = null as any;
+                    });
+                    // @ts-ignore
+                    countryPopup = popup;
+                    spawnedThisClick = true;
+                });
 
             node.append("title").
                 text((d: any) => d.id);
