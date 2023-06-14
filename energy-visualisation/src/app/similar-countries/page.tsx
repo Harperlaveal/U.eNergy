@@ -477,7 +477,7 @@ export const SimilarCountriesPage = () => {
                     {
                         // add a div that states the current similarity threshold
                         // make the text bold
-                        <div className="color-map-entry border border-black">
+                        <div className="color-map-entry border border-black" title="The similarity required between two countries' energy production distribution before they are connected in the graph">
                             <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
                                 <div className="flex flex-row space-x-2">
                                     <p className="font-bold">Similarity: {similarityThreshold.toFixed(2)}</p>
@@ -490,8 +490,8 @@ export const SimilarCountriesPage = () => {
                         <div className="color-map-entry">
                             <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
                                 <div className="flex flex-row space-x-2">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold > minThreshold) setSimilarityThreshold(similarityThreshold - incrementAmount)}} title="Countries with less similarity between their energy generation methods are clumbed together">Less Similarity</button>
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold < maxThreshold) setSimilarityThreshold(similarityThreshold + incrementAmount)}} title="Countries with more similarity between their energy generation methods are clumbed together">More Similarity</button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold > minThreshold) setSimilarityThreshold(similarityThreshold - incrementAmount)}} title="Countries with less similarity between their energy generation methods are clumped together">Less Similarity</button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold < maxThreshold) setSimilarityThreshold(similarityThreshold + incrementAmount)}} title="Countries with more similarity between their energy generation methods are clumped together">More Similarity</button>
                                 </div>
                             </div>
                         </div>
