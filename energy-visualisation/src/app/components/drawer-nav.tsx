@@ -77,7 +77,7 @@ const NavItemList: NavItem[] = [
       },
       {
         title: "By Similarities",
-        href: "",
+        href: "/similar-countries",
         icon: <GroupIcon />,
       },
       {
