@@ -58,6 +58,11 @@ export const SimilarCountriesPage = () => {
     const [selectedCountry, setSelectedCountry] = useState<Country>(null as any);
     const [years, setYears] = useState<string[]>([]);
     const [year, setYear] = useState<string>("2022");
+    const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.70); // The closer to 1, the more similar the countries are
+
+    const maxThreshold: number = 1;
+    const minThreshold: number = -1;
+    const incrementAmount: number = 0.02;
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
@@ -88,6 +93,7 @@ export const SimilarCountriesPage = () => {
             const countries = dataFromYear.map(d => String(d.COUNTRY)).filter((value, index, self) => self.indexOf(value) === index);
             // remove any elements from filteredData that are not in productionMethods
             const instances = dataFromYear.filter(d => productionMethods.includes(String(d.PRODUCT)));
+
             // find all the unique years
             var years: string[] = [];
             data.forEach(d => {
@@ -220,12 +226,67 @@ export const SimilarCountriesPage = () => {
                 var difference: number = Math.abs(totalEnergyA - totalEnergyB);
                 var range: number = largestCountryTotal.amount - smallestCountryTotal.amount;
                 var normalizedDifference: number = difference / range;
-                return normalizedDifference;
+                return 3*(1 - normalizedDifference); // This causes countries with a large difference in energy production to have a thin edge connecting them
+            };
+
+            const calculateCountrySimilarityExotic: (countryA: string, countryB: string) => number = (countryA: string, countryB: string) => {
+                return 0;
+            };
+
+            const shouldCountriesHaveEdge: (countryA: string, countryB: string) => boolean = (countryA: string, countryB: string) => {
+                // Store the total energy generated for each method for countryA in an array
+                var countryAInstances = instances.filter(d => String(d.COUNTRY) === countryA);
+                var countryAMethodTotals: number[] = [];
+                productionMethods.forEach(method => {
+                    var countryAMethodInstances = countryAInstances.filter(d => String(d.PRODUCT) === method);
+                    var countryAMethodTotal = countryAMethodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    // use production color map to decide the index into the array
+                    var index: number = Number(productionColorMap.get(method));
+                    countryAMethodTotals[index] = countryAMethodTotal;
+                });
+                // Store the total energy generated for each method for countryB in an array
+                var countryBInstances = instances.filter(d => String(d.COUNTRY) === countryB);
+                var countryBMethodTotals: number[] = [];
+                productionMethods.forEach(method => {
+                    var countryBMethodInstances = countryBInstances.filter(d => String(d.PRODUCT) === method);
+                    var countryBMethodTotal = countryBMethodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    // use production color map to decide the index into the array
+                    var index: number = Number(productionColorMap.get(method));
+                    countryBMethodTotals[index] = countryBMethodTotal;
+                });
+
+                // log an error if the arrays are not the same length
+                if (countryAMethodTotals.length !== countryBMethodTotals.length) {
+                    console.error("Country A and Country B do not have the same number of energy generation methods");
+                    return false;
+                }
+
+                // treat the two arrays as vectors, calculate the dot product between them
+                var dotProduct: number = 0;
+                var magnitudeA: number = 0;
+                var magnitudeB: number = 0;
+                for (var i = 0; i < countryAMethodTotals.length; i++) {
+                    dotProduct += countryAMethodTotals[i] * countryBMethodTotals[i];
+                    magnitudeA += countryAMethodTotals[i] * countryAMethodTotals[i];
+                    magnitudeB += countryBMethodTotals[i] * countryBMethodTotals[i];
+                }
+                magnitudeA = Math.sqrt(magnitudeA);
+                magnitudeB = Math.sqrt(magnitudeB);
+                var cosineSimilarity: number = dotProduct / (magnitudeA * magnitudeB);
+                if (cosineSimilarity < similarityThreshold) {
+                    return false;
+                }
+                // if (!checkSameTopGenerationMethod(countryA, countryB)) {
+                //     return false;
+                // }
+                return true;
             };
 
             // var temp:number = 0/100; // 0
             // var temp2:number = 0/0; // NaN
             // var temp3:number = 10/0; // Infinity
+            // log the similairty threshold
+            // console.log("Similarity Threshold: " + similarityThreshold);
 
             // A set of countries that has already been visited
             var visited: string[] = [];
@@ -244,7 +305,7 @@ export const SimilarCountriesPage = () => {
                     if (!checkForSharedGenerationMethods(countryA, countryB)) {
                         return;
                     }
-                    if (!checkSameTopGenerationMethod(countryA, countryB)) {
+                    if (!shouldCountriesHaveEdge(countryA, countryB)) {
                         return;
                     }
                     // var weight: number = calculateCountrySimilarityEuclidean(countryA, countryB);
@@ -375,7 +436,8 @@ export const SimilarCountriesPage = () => {
             }
 
         });
-    }, [year] /*This argument causes this function to be called once when the page is loaded and if the selected year changes*/);
+    }, [year, similarityThreshold]);
+    /*This argument causes this function to be recalled if the selected year or similarity threshold changes*/
 
     return (
         <div className=" flex flex-col items-center pt-24 w-full">
@@ -410,6 +472,28 @@ export const SimilarCountriesPage = () => {
                             </div>
                         }
                         )
+                    }
+                    {
+                        // add a div that states the current similarity threshold
+                        // make the text bold
+                        <div className="color-map-entry border border-black">
+                            <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
+                                <div className="flex flex-row space-x-2">
+                                    <p className="font-bold">Similarity: {similarityThreshold.toFixed(2)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    {
+                        // add a div that contains two buttons, one for decreasing the similarity threshold, one for increasing the similarity threshold
+                        <div className="color-map-entry">
+                            <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
+                                <div className="flex flex-row space-x-2">
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold > minThreshold) setSimilarityThreshold(similarityThreshold - incrementAmount)}} title="Countries with less similarity between their energy generation methods are clumbed together">Less Similarity</button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold < maxThreshold) setSimilarityThreshold(similarityThreshold + incrementAmount)}} title="Countries with more similarity between their energy generation methods are clumbed together">More Similarity</button>
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
                 {
