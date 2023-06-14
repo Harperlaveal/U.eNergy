@@ -223,6 +223,59 @@ export const SimilarCountriesPage = () => {
                 return normalizedDifference;
             };
 
+            const calculateCountrySimilarityExotic: (countryA: string, countryB: string) => number = (countryA: string, countryB: string) => {
+                return 0;
+            };
+
+            const shouldCountriesHaveEdge: (countryA: string, countryB: string) => boolean = (countryA: string, countryB: string) => {
+                // Store the total energy generated for each method for countryA in an array
+                var countryAInstances = instances.filter(d => String(d.COUNTRY) === countryA);
+                var countryAMethodTotals: number[] = [];
+                productionMethods.forEach(method => {
+                    var countryAMethodInstances = countryAInstances.filter(d => String(d.PRODUCT) === method);
+                    var countryAMethodTotal = countryAMethodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    // use production color map to decide the index into the array
+                    var index: number = Number(productionColorMap.get(method));
+                    countryAMethodTotals[index] = countryAMethodTotal;
+                });
+                // Store the total energy generated for each method for countryB in an array
+                var countryBInstances = instances.filter(d => String(d.COUNTRY) === countryB);
+                var countryBMethodTotals: number[] = [];
+                productionMethods.forEach(method => {
+                    var countryBMethodInstances = countryBInstances.filter(d => String(d.PRODUCT) === method);
+                    var countryBMethodTotal = countryBMethodInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+                    // use production color map to decide the index into the array
+                    var index: number = Number(productionColorMap.get(method));
+                    countryBMethodTotals[index] = countryBMethodTotal;
+                });
+
+                // log an error if the arrays are not the same length
+                if (countryAMethodTotals.length !== countryBMethodTotals.length) {
+                    console.error("Country A and Country B do not have the same number of energy generation methods");
+                }
+
+                // treat the two arrays as vectors, calculate the dot product between them
+                var dotProduct: number = 0;
+                var magnitudeA: number = 0;
+                var magnitudeB: number = 0;
+                for (var i = 0; i < countryAMethodTotals.length; i++) {
+                    dotProduct += countryAMethodTotals[i] * countryBMethodTotals[i];
+                    magnitudeA += countryAMethodTotals[i] * countryAMethodTotals[i];
+                    magnitudeB += countryBMethodTotals[i] * countryBMethodTotals[i];
+                }
+                magnitudeA = Math.sqrt(magnitudeA);
+                magnitudeB = Math.sqrt(magnitudeB);
+                var cosineSimilarity: number = dotProduct / (magnitudeA * magnitudeB);
+                const similarityThreshold: number = 0.8; // The closer to 1, the more similar the countries are
+                if (cosineSimilarity < similarityThreshold) {
+                    return false;
+                }
+                // if (!checkSameTopGenerationMethod(countryA, countryB)) {
+                //     return false;
+                // }
+                return true;
+            };
+
             // var temp:number = 0/100; // 0
             // var temp2:number = 0/0; // NaN
             // var temp3:number = 10/0; // Infinity
@@ -244,7 +297,7 @@ export const SimilarCountriesPage = () => {
                     if (!checkForSharedGenerationMethods(countryA, countryB)) {
                         return;
                     }
-                    if (!checkSameTopGenerationMethod(countryA, countryB)) {
+                    if (!shouldCountriesHaveEdge(countryA, countryB)) {
                         return;
                     }
                     // var weight: number = calculateCountrySimilarityEuclidean(countryA, countryB);
