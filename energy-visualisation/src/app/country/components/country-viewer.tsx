@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import BarChart from "./barchart";
 import Timeline from "./timeline";
-import { EnergyProductionData, EnergySourceProduction } from "../interfaces";
+import { EnergyProductionData } from "../interfaces";
 import { CountryDataContext } from "../contexts/country-data-context";
+import CountryLoader from "./country-loader/country-loader";
+import { Card, CardContent, TextField } from "@mui/material";
 
 interface CountryViewerProps {
   countryName: string;
@@ -41,12 +43,16 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
     return max;
   };
 
-  if (countryData[countryName] === undefined) {
-    return <></>;
+  if (!countryData[countryName]) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-full">
+        <CountryLoader />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-full">
+    <div className="flex flex-col items-center justify-center h-full w-full">
       <h1 className="text-2xl font-bold mb-6">{countryName}</h1>
       <div className="h-[50%] w-[75%]">
         <BarChart
@@ -57,14 +63,10 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
           }
           max={calculateMaxWatts(countryData[countryName])}
         />
-        {countryData[countryName] && countryData[countryName].length > 0 ? (
-          <Timeline
-            data={countryData[countryName]}
-            onYearChange={handleYearChange}
-          />
-        ) : (
-          <div></div>
-        )}
+        <Timeline
+          data={countryData[countryName]}
+          onYearChange={handleYearChange}
+        />
       </div>
     </div>
   );

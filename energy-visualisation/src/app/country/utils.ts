@@ -36,11 +36,26 @@ export function groupByYear(rows: CSVRow[]): EnergyProductionData[] {
 
 export function createCountryData(allRows: CSVRow[]): { [country: string]: EnergyProductionData[] } {
     const allCountriesData: { [country: string]: EnergyProductionData[] } = {};
+    const energySources = [
+        "Hydro",
+        "Nuclear",
+        "Solar",
+        "Wind",
+        "Other renewables",
+        "Natural gas",
+        "Coal",
+        "Oil",
+    ];
 
     for (const row of allRows) {
         const country = row.COUNTRY;
         const year = row.YEAR;
         const production = convertToEnergySourceProduction(row);
+
+        // Only add production data for the 8 specified energy sources
+        if (!energySources.includes(production.source)) {
+            continue;
+        }
 
         if (!allCountriesData[country]) {
             allCountriesData[country] = [];
@@ -52,41 +67,16 @@ export function createCountryData(allRows: CSVRow[]): { [country: string]: Energ
         if (!yearData) {
             yearData = {
                 year: year,
-                production: [],
+                // Initialize with zero production for all energy sources
+                production: energySources.map((source) => ({ source: source, watts: 0 })),
             };
             countryData.push(yearData);
         }
 
-        yearData.production.push(production);
-    }
-
-    // Select the top 10 energy sources with the highest watts for each country
-    for (const country in allCountriesData) {
-        const countryData = allCountriesData[country];
-
-        // Calculate the total watts for each energy source
-        const energySourceWatts: { [source: string]: number } = {};
-        for (const yearData of countryData) {
-            for (const production of yearData.production) {
-                const source = production.source;
-                const watts = production.watts;
-                energySourceWatts[source] = (energySourceWatts[source] || 0) + watts;
-            }
-        }
-
-        // Sort the energy sources based on watts in descending order
-        const topEnergySources = Object.keys(energySourceWatts).sort(
-            (a, b) => energySourceWatts[b] - energySourceWatts[a]
-        ).slice(0, 10);
-
-        // Update the production data for each year to include only the top energy sources
-        for (const yearData of countryData) {
-            const yearProduction: EnergySourceProduction[] = [];
-            for (const source of topEnergySources) {
-                const production = yearData.production.find((p) => p.source === source);
-                yearProduction.push(production || { source: source, watts: 0 });
-            }
-            yearData.production = yearProduction;
+        // Find the production entry for the current energy source and update the watts
+        const sourceProduction = yearData.production.find((p) => p.source === production.source);
+        if (sourceProduction) {
+            sourceProduction.watts = production.watts;
         }
     }
 

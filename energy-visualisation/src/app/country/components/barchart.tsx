@@ -5,10 +5,11 @@ import {
   scaleLinear,
   axisLeft,
   axisBottom,
+  scaleOrdinal,
   transition,
 } from "d3";
-import { EnergyProductionData } from "../interfaces";
-import { ThemeContext } from "../../contexts/theme-context"; // Update this path
+import { EnergyProductionData, EnergySourceProduction } from "../interfaces";
+import { ThemeContext } from "../../contexts/theme-context";
 
 interface BarChartProps {
   data?: EnergyProductionData;
@@ -18,10 +19,10 @@ interface BarChartProps {
 export default function BarChart({ data, max }: BarChartProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const { theme } = useContext(ThemeContext); // Get current theme mode
-  const isDarkMode = theme === "dark"; // Whether the current theme is dark mode
-  const labelColor = isDarkMode ? "white" : "black"; // color of labels
-  const tooltipBackgroundColor = isDarkMode ? "black" : "white"; // color of tooltip background
+  const { theme } = useContext(ThemeContext);
+  const isDarkMode = theme === "dark";
+  const labelColor = isDarkMode ? "white" : "black";
+  const tooltipBackgroundColor = isDarkMode ? "black" : "white";
 
   useEffect(() => {
     if (!data || !svgRef.current || !wrapperRef.current) return;
@@ -34,19 +35,38 @@ export default function BarChart({ data, max }: BarChartProps) {
 
     const xScale = scaleLinear()
       .domain([0, max])
-      .range([margin.left, width - margin.right]);
+      .range([0, width - margin.right - margin.left]);
 
     const yScale = scaleBand()
       .domain(data.production.map((d) => d.source))
       .range([margin.top, height - margin.bottom])
       .padding(0.2);
 
+    // Create color scale
+    const colorScale = scaleOrdinal()
+      .domain(data.production.map((d) => d.source))
+      .range([
+        "#1f77b4",
+        "#ff7f0e",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+      ]);
+
+    const colorFn = (d: EnergySourceProduction): string => {
+      const color = colorScale(d.source);
+      return color ? (color as string) : "#000000"; // default color
+    };
+
     const xAxis = axisBottom(xScale).tickSizeOuter(0);
     const yAxis = axisLeft(yScale).tickSizeOuter(0);
 
     const xAxisG = svg
       .select<SVGGElement>(".x-axis")
-      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .attr("transform", `translate(${margin.left}, ${height - margin.bottom})`)
       .call(xAxis);
 
     const xAxisText = xAxisG.selectAll("text.axis-label").data([null]);
@@ -54,12 +74,12 @@ export default function BarChart({ data, max }: BarChartProps) {
     xAxisText
       .join("text")
       .attr("class", "axis-label")
-      .attr("x", width / 2)
-      .attr("y", 40)
+      .attr("x", (width - margin.right - margin.left) / 2)
+      .attr("y", 60)
       .attr("fill", labelColor)
       .style("font-size", "20px")
       .attr("text-anchor", "middle")
-      .text("Watts");
+      .text("Terrawatt Hours");
 
     const yAxisG = svg
       .select<SVGGElement>(".y-axis")
@@ -72,7 +92,7 @@ export default function BarChart({ data, max }: BarChartProps) {
       .join("text")
       .attr("class", "axis-label")
       .attr("x", -height / 2)
-      .attr("y", -70)
+      .attr("y", -120)
       .attr("transform", "rotate(-90)")
       .attr("fill", labelColor)
       .style("font-size", "20px")
@@ -99,26 +119,33 @@ export default function BarChart({ data, max }: BarChartProps) {
         (enter) =>
           enter
             .append("rect")
-            .attr("x", margin.left)
             .attr("y", (d) => yScale(d.source) || 0)
-            .attr("width", (d) => xScale(d.watts))
+            .attr("x", margin.left) // Bars start at y-axis
+            .attr("width", 0) // Initial width is 0
             .attr("height", yScale.bandwidth())
+            .attr("fill", colorFn)
+            .attr("fill-opacity", "0.5")
+            .attr("stroke", colorFn)
+            .on("mouseover", function () {
+              select(this).style("fill-opacity", 1);
+            })
             .on("mousemove", function (event, d) {
               tooltip
                 .style("top", `${event.pageY - 10}px`)
                 .style("left", `${event.pageX + 10}px`)
                 .style("visibility", "visible")
-                .html(`Source: ${d.source}<br>Watts: ${d.watts}`);
+                .html(`Method: ${d.source}<br>TWh: ${d.watts}`);
             })
             .on("mouseout", function () {
               tooltip.style("visibility", "hidden");
+              select(this).style("fill-opacity", 0.5);
             })
-            .call((enter) =>
-              enter
-                .transition(t)
-                .delay((d, i) => i * 100)
-                .attr("x", margin.left)
-                .attr("width", (d) => xScale(d.watts))
+            .call(
+              (enter) =>
+                enter
+                  .transition(t)
+                  .delay((d, i) => i * 100)
+                  .attr("width", (d) => xScale(d.watts)) // Animate width to scaled 'watts' value
             ),
         (update) =>
           update.call((update) =>
@@ -132,13 +159,7 @@ export default function BarChart({ data, max }: BarChartProps) {
           exit.call((exit) =>
             exit.transition(t).attr("x", margin.left).attr("width", 0).remove()
           )
-      )
-      .attr(
-        "class",
-        "fill-primary opacity-50 stroke-vuwGreen stroke-1 hover:opacity-100"
       );
-
-    svg.selectAll("rect").data(data.production);
   }, [data, theme]);
 
   return (
