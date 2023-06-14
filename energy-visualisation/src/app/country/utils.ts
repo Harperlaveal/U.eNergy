@@ -34,18 +34,19 @@ export function groupByYear(rows: CSVRow[]): EnergyProductionData[] {
     }));
 }
 
+export const energySources = [
+    "Hydro",
+    "Nuclear",
+    "Solar",
+    "Wind",
+    "Other renewables",
+    "Natural gas",
+    "Coal",
+    "Oil",
+];
+
 export function createCountryData(allRows: CSVRow[]): { [country: string]: EnergyProductionData[] } {
     const allCountriesData: { [country: string]: EnergyProductionData[] } = {};
-    const energySources = [
-        "Hydro",
-        "Nuclear",
-        "Solar",
-        "Wind",
-        "Other renewables",
-        "Natural gas",
-        "Coal",
-        "Oil",
-    ];
 
     for (const row of allRows) {
         const country = row.COUNTRY;
@@ -78,6 +79,15 @@ export function createCountryData(allRows: CSVRow[]): { [country: string]: Energ
         if (sourceProduction) {
             sourceProduction.watts = production.watts;
         }
+    }
+
+    // Sort the energy sources by watts in descending order for each country's production data
+    for (const country in allCountriesData) {
+        const countryData = allCountriesData[country];
+
+        countryData.forEach((yearData) => {
+            yearData.production.sort((a, b) => b.watts - a.watts);
+        });
     }
 
     return allCountriesData;
