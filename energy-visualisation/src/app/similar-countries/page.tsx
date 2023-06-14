@@ -226,7 +226,7 @@ export const SimilarCountriesPage = () => {
                 var difference: number = Math.abs(totalEnergyA - totalEnergyB);
                 var range: number = largestCountryTotal.amount - smallestCountryTotal.amount;
                 var normalizedDifference: number = difference / range;
-                return 3*(1 - normalizedDifference);
+                return 3*(1 - normalizedDifference); // This causes countries with a large difference in energy production to have a thin edge connecting them
             };
 
             const calculateCountrySimilarityExotic: (countryA: string, countryB: string) => number = (countryA: string, countryB: string) => {
@@ -436,7 +436,8 @@ export const SimilarCountriesPage = () => {
             }
 
         });
-    }, [year, similarityThreshold] /*This argument causes this function to be called once when the page is loaded and if the selected year changes*/);
+    }, [year, similarityThreshold]);
+    /*This argument causes this function to be recalled if the selected year or similarity threshold changes*/
 
     return (
         <div className=" flex flex-col items-center pt-24 w-full">
@@ -473,7 +474,7 @@ export const SimilarCountriesPage = () => {
                         )
                     }
                     {
-                        // add a vis that states the current similarity threshold
+                        // add a div that states the current similarity threshold
                         // make the text bold
                         <div className="color-map-entry border border-black">
                             <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
