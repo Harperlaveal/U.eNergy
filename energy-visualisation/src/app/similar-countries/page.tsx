@@ -258,6 +258,7 @@ export const SimilarCountriesPage = () => {
                 // log an error if the arrays are not the same length
                 if (countryAMethodTotals.length !== countryBMethodTotals.length) {
                     console.error("Country A and Country B do not have the same number of energy generation methods");
+                    return false;
                 }
 
                 // treat the two arrays as vectors, calculate the dot product between them
