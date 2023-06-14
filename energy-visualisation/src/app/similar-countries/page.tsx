@@ -58,6 +58,11 @@ export const SimilarCountriesPage = () => {
     const [selectedCountry, setSelectedCountry] = useState<Country>(null as any);
     const [years, setYears] = useState<string[]>([]);
     const [year, setYear] = useState<string>("2022");
+    const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.70); // The closer to 1, the more similar the countries are
+
+    const maxThreshold: number = 1;
+    const minThreshold: number = -1;
+    const incrementAmount: number = 0.02;
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
@@ -88,6 +93,7 @@ export const SimilarCountriesPage = () => {
             const countries = dataFromYear.map(d => String(d.COUNTRY)).filter((value, index, self) => self.indexOf(value) === index);
             // remove any elements from filteredData that are not in productionMethods
             const instances = dataFromYear.filter(d => productionMethods.includes(String(d.PRODUCT)));
+
             // find all the unique years
             var years: string[] = [];
             data.forEach(d => {
@@ -266,7 +272,6 @@ export const SimilarCountriesPage = () => {
                 magnitudeA = Math.sqrt(magnitudeA);
                 magnitudeB = Math.sqrt(magnitudeB);
                 var cosineSimilarity: number = dotProduct / (magnitudeA * magnitudeB);
-                const similarityThreshold: number = 0.85; // The closer to 1, the more similar the countries are
                 if (cosineSimilarity < similarityThreshold) {
                     return false;
                 }
@@ -279,6 +284,8 @@ export const SimilarCountriesPage = () => {
             // var temp:number = 0/100; // 0
             // var temp2:number = 0/0; // NaN
             // var temp3:number = 10/0; // Infinity
+            // log the similairty threshold
+            // console.log("Similarity Threshold: " + similarityThreshold);
 
             // A set of countries that has already been visited
             var visited: string[] = [];
@@ -428,7 +435,7 @@ export const SimilarCountriesPage = () => {
             }
 
         });
-    }, [year] /*This argument causes this function to be called once when the page is loaded and if the selected year changes*/);
+    }, [year, similarityThreshold] /*This argument causes this function to be called once when the page is loaded and if the selected year changes*/);
 
     return (
         <div className=" flex flex-col items-center pt-24 w-full">
@@ -463,6 +470,28 @@ export const SimilarCountriesPage = () => {
                             </div>
                         }
                         )
+                    }
+                    {
+                        // add a vis that states the current similarity threshold
+                        // make the text bold
+                        <div className="color-map-entry border border-black">
+                            <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
+                                <div className="flex flex-row space-x-2">
+                                    <p className="font-bold">Similarity: {similarityThreshold.toFixed(2)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    {
+                        // add a div that contains two buttons, one for decreasing the similarity threshold, one for increasing the similarity threshold
+                        <div className="color-map-entry">
+                            <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
+                                <div className="flex flex-row space-x-2">
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold > minThreshold) setSimilarityThreshold(similarityThreshold - incrementAmount)}} title="Countries with less similarity between their energy generation methods are clumbed together">Less Similarity</button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => {if(similarityThreshold < maxThreshold) setSimilarityThreshold(similarityThreshold + incrementAmount)}} title="Countries with more similarity between their energy generation methods are clumbed together">More Similarity</button>
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
                 {
