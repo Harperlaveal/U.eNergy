@@ -376,9 +376,20 @@ export const SimilarCountriesPage = () => {
       <div>
           <h1>Countries</h1>
           <div id="visualization"></div>
-          {
-            
-          }
+          <div id="color-map">
+            {
+                // Add a div for each color in prductionColors
+                Object.keys(productionMethods).map((key: string) => {
+                    const methodName: string = productionMethods[Number(key)];
+                    const color: string = productionColors[Number(productionColorMap.get(methodName))];
+                    const textColor: string = methodName === "Coal" ? "white" : "black";
+                    return <div key={methodName} className="color-map-entry">
+                        <div className="color-map-color" style={{backgroundColor: color, color: textColor}}>{methodName}</div>
+                    </div>
+                }
+                )
+            }
+          </div>
       </div>
     ); 
 };
