@@ -375,7 +375,7 @@ export const SimilarCountriesPage = () => {
             }
 
         });
-    }, [year] /*This argument causes this function to be called once when the page is loaded*/);
+    }, [year] /*This argument causes this function to be called once when the page is loaded and if the selected year changes*/);
 
     return (
         <div className=" flex flex-col items-center pt-24 w-full">
