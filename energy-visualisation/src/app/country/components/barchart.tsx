@@ -63,6 +63,7 @@ export default function BarChart({ data, max }: BarChartProps) {
       .padding(0.2);
 
     const yAxis = axisLeft(yScale).tickSizeOuter(0);
+    const xAxis = axisBottom(xScale);
 
     const t = transition().duration(1000);
 
@@ -77,6 +78,12 @@ export default function BarChart({ data, max }: BarChartProps) {
       .attr("transform", (d) => `translate(0,${yScale(d.source)})`);
 
     yAxisG.transition(t).call(yAxis);
+
+    const xAxisG = svg
+      .select<SVGGElement>(".x-axis")
+      .attr("transform", `translate(${margin.left},${height - margin.bottom})`);
+
+    xAxisG.transition(t).call(xAxis);
 
     const tooltip = select("body")
       .append("div")

@@ -27,10 +27,12 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
     if (typeof newValue === "number") {
       setValue(newValue);
       onYearChange(newValue);
-      const closestYear = data.reduce((prev, curr) => 
-        Math.abs(curr.year - newValue) < Math.abs(prev.year - newValue) ? curr : prev
+      const closestYear = data.reduce((prev, curr) =>
+        Math.abs(curr.year - newValue) < Math.abs(prev.year - newValue)
+          ? curr
+          : prev
       );
-      const newIndex = data.findIndex(d => d.year === closestYear.year);
+      const newIndex = data.findIndex((d) => d.year === closestYear.year);
       if (newIndex !== -1) {
         setIndex(newIndex);
       }
@@ -94,7 +96,17 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
       />
       <div className="flex justify-between text-xs w-full">
         {data.map((d, i) => (
-          <span
+          <button
+            className={` hover:text-blue-400 ${
+              d.year === value
+                ? "text-blue-500 "
+                : ""
+            }`}
+            onClick={() => {
+              setIndex(i);
+              setValue(d.year);
+              onYearChange(d.year);
+            }}
             key={d.year}
             style={{
               position: "absolute",
@@ -103,7 +115,7 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
             }}
           >
             {d.year}
-          </span>
+          </button>
         ))}
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function CountryPage({ params }: { params: { id: string } }) {
       <CountryDataProvider>
         <h1 className="text-4xl font-semi-bold mb-6">{countryName}</h1>
         <div className="flex flex-row space-x-2">
-          <div className="pb-4 px-24 pt-4 shadow-xl w-[80%] min-h-[700px] items-center rounded-xl">
+          <div className="pb-8 px-24 pt-4 shadow-xl w-[80%] min-h-[700px] items-center rounded-xl">
             <CountryViewer countryName={countryName} />
           </div>
           <div className="flex flex-col flex-grow space-y-4 ">
