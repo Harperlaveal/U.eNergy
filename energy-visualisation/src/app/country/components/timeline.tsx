@@ -55,7 +55,6 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
           </span>
         ))}
       </div>
-      <div className="text-center mt-5">{value}</div>
     </div>
   );
 }

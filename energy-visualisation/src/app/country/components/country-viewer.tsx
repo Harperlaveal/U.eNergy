@@ -45,7 +45,7 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
 
   if (!countryData[countryName]) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen w-full">
+      <div className="flex flex-col items-center justify-center h-full w-full">
         <CountryLoader />
       </div>
     );
@@ -53,21 +53,21 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
-      <h1 className="text-2xl font-bold mb-6">{countryName}</h1>
-      <div className="h-[50%] w-[75%]">
-        <BarChart
-          data={
-            selectedYear
-              ? countryData[countryName]?.find((d) => d.year == selectedYear)
-              : countryData[countryName]?.[countryData[countryName]?.length - 1]
-          }
-          max={calculateMaxWatts(countryData[countryName])}
-        />
-        <Timeline
-          data={countryData[countryName]}
-          onYearChange={handleYearChange}
-        />
-      </div>
+      <h1 className="text-2xl font-medium">
+        Energy Productions in the Year {selectedYear}
+      </h1>
+      <BarChart
+        data={
+          selectedYear
+            ? countryData[countryName]?.find((d) => d.year == selectedYear)
+            : countryData[countryName]?.[countryData[countryName]?.length - 1]
+        }
+        max={calculateMaxWatts(countryData[countryName])}
+      />
+      <Timeline
+        data={countryData[countryName]}
+        onYearChange={handleYearChange}
+      />
     </div>
   );
 }

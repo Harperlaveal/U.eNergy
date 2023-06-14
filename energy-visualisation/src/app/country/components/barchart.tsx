@@ -62,20 +62,21 @@ export default function BarChart({ data, max }: BarChartProps) {
       .range([margin.top, height - margin.bottom])
       .padding(0.2);
 
-    const xAxis = axisBottom(xScale).tickSizeOuter(0);
     const yAxis = axisLeft(yScale).tickSizeOuter(0);
 
-    const xAxisG = svg
-      .select<SVGGElement>(".x-axis")
-      .attr("transform", `translate(${margin.left}, ${height - margin.bottom})`)
-      .call(xAxis);
+    const t = transition().duration(1000);
 
     const yAxisG = svg
       .select<SVGGElement>(".y-axis")
-      .attr("transform", `translate(${margin.left}, 0)`)
-      .call(yAxis);
+      .attr("transform", `translate(${margin.left}, 0)`);
 
-    const t = transition().duration(1000);
+    yAxisG
+      .selectAll(".tick")
+      .data(data.production, (d: any) => d.source)
+      .transition(t)
+      .attr("transform", (d) => `translate(0,${yScale(d.source)})`);
+
+    yAxisG.transition(t).call(yAxis);
 
     const tooltip = select("body")
       .append("div")
@@ -130,7 +131,7 @@ export default function BarChart({ data, max }: BarChartProps) {
     <div className="flex flex-row w-full">
       <div ref={wrapperRef} style={{ flex: "1" }} className="relative h-500px">
         <div className="transform -rotate-90 absolute left-[-100px] top-[50%]">
-          <div>Production Method</div>
+          <h1 className="text-lg ">Production Method</h1>
         </div>
         <svg
           ref={svgRef}
@@ -139,8 +140,8 @@ export default function BarChart({ data, max }: BarChartProps) {
           <g className="x-axis" />
           <g className="y-axis" />
         </svg>
-        <div className="absolute bottom-0 left-0 right-0 text-center">
-          <div>Amount Produced (Terrawatt Hours)</div>
+        <div className="absolute bottom-[-10px] left-0 right-0 text-center">
+          <h1 className="text-lg ">Amount Produced (Terrawatt Hours)</h1>
         </div>
       </div>
       <div className="w-[200px]">
