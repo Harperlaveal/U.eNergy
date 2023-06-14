@@ -94,7 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <DrawerNav toggleOpen={toggleOpen} open={open} />
 
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box component="main" sx={{ flexGrow: 1 }}>
           {children}
         </Box>
       </Box>
