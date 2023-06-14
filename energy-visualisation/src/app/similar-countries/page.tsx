@@ -16,9 +16,6 @@
 import React, { use, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-// type script string variable called year
-const year: string = '2022';
-
 /**
  * An array of strings that represent the different energy production methods
  */
@@ -57,6 +54,8 @@ interface Country {
 export const SimilarCountriesPage = () => {
 
     const [selectedCountry, setSelectedCountry] = useState<Country>(null as any);
+    const [years, setYears] = useState<string[]>([]);
+    const [year, setYear] = useState<string>("2022");
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
@@ -87,6 +86,14 @@ export const SimilarCountriesPage = () => {
             const countries = dataFromYear.map(d => String(d.COUNTRY)).filter((value, index, self) => self.indexOf(value) === index);
             // remove any elements from filteredData that are not in productionMethods
             const instances = dataFromYear.filter(d => productionMethods.includes(String(d.PRODUCT)));
+            // find all the unique years
+            var years: string[] = [];
+            data.forEach(d => {
+                if (!years.includes(String(d.YEAR))) {
+                    years.push(String(d.YEAR));
+                }
+            });
+            setYears(years);
             // log instances
             // console.log(instances);
 
@@ -277,6 +284,7 @@ export const SimilarCountriesPage = () => {
                 on("tick", ticked);
 
             const container = d3.select("#visualization");
+            container.selectAll("*").remove();
             const svg = container.append("svg").
                 attr("viewBox", [0, 0, width, height]).
                 attr("width", width).
@@ -295,7 +303,7 @@ export const SimilarCountriesPage = () => {
                 attr("stroke", "#fff").
                 attr("stroke-width", 1.5).
                 selectAll("circle").
-                data(nodes). 
+                data(nodes).
                 join("circle").
                 attr("r", 5).
                 attr("fill", (d: any) => productionColors[d.group]).
@@ -345,7 +353,7 @@ export const SimilarCountriesPage = () => {
             }
 
         });
-    }, [] /*This argument causes this function to be called once when the page is loaded*/);
+    }, [year] /*This argument causes this function to be called once when the page is loaded*/);
 
     return (
         <div className=" flex flex-col items-center pt-24 w-full">
@@ -382,6 +390,18 @@ export const SimilarCountriesPage = () => {
                         )
                     }
                 </div>
+                {
+                    <div id="year-list" className="fixed bottom-0 flex flex-row ">
+                        {
+                            years.map((y: string) => {
+                                return <div key={y} className="year-list-entry">
+                                    <div className={`year-list-year p-4 font-medium rounded opacity-90 hover:opacity-100 cursor-pointer hover:underline  ${y === year ? " text-blue-500 underline " : " text-black"} `} onClick={() => setYear(y)}>{y}</div>
+                                </div>
+                            }
+                            )
+                        }
+                    </div>
+                }
             </div>
         </div>
     );
