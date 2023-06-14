@@ -43,10 +43,20 @@ const productionColorMap: Map<string, number> = new Map([
     ["Oil", 7]
 ]);
 
+interface Country {
+    country: string,
+    largestMethod: string,
+    amount: number,
+    color: string,
+    id: string,
+    group: number,
+    energyTotal: number
+}
+
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => {
 
-    const [selectedCountry, setSelectedCountry] = useState<string>("");
+    const [selectedCountry, setSelectedCountry] = useState<Country>(null as any);
 
     // This log message currently appears in both the web browser console and the server console
     console.log("Hello from SimilarCountriesPage");
@@ -57,7 +67,7 @@ export const SimilarCountriesPage = () => {
         var clicked = event.target as HTMLElement;
         var typeOfClicked: string = clicked.tagName;
         if (typeOfClicked !== "circle") {
-            setSelectedCountry("");
+            setSelectedCountry(null as any);
         }
     }
     );
@@ -241,8 +251,8 @@ export const SimilarCountriesPage = () => {
 
             // time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork)
 
-            const width: number = 850;
-            const height: number = 500;
+            const width: number = 650;
+            const height: number = 650;
             // convert the country instances to nodes
             const nodes: d3.SimulationNodeDatum[] = countryTotals.map(country => {
                 return {
@@ -285,13 +295,13 @@ export const SimilarCountriesPage = () => {
                 attr("stroke", "#fff").
                 attr("stroke-width", 1.5).
                 selectAll("circle").
-                data(nodes).
+                data(nodes). 
                 join("circle").
                 attr("r", 5).
                 attr("fill", (d: any) => productionColors[d.group]).
                 // Create a popup when a node is clicked with information about the node
                 on("click", (event: any, d: any) => {
-                    setSelectedCountry(d.id);
+                    setSelectedCountry(d as Country);
                     console.log(d);
                 });
 
@@ -338,28 +348,40 @@ export const SimilarCountriesPage = () => {
     }, [] /*This argument causes this function to be called once when the page is loaded*/);
 
     return (
-        <div className="h-screen flex flex-row w-full pt-24">
-            {/*the pop up component*/}
-            <div id="country-popup">
-                {selectedCountry}
-            </div>
-            <div className="flex flex-col">
-                <h1>Countries</h1>
-                <div id="visualization"></div>
-            </div>
-            <div id="color-map">
-                {
-                    // Add a div for each color in prductionColors
-                    Object.keys(productionMethods).map((key: string) => {
-                        const methodName: string = productionMethods[Number(key)];
-                        const color: string = productionColors[Number(productionColorMap.get(methodName))];
-                        const textColor: string = methodName === "Coal" ? "white" : "black";
-                        return <div key={methodName} className="color-map-entry">
-                            <div className="color-map-color" style={{ backgroundColor: color, color: textColor }}>{methodName}</div>
+        <div className=" flex flex-col items-center pt-24 w-full">
+            <h1 className="text-4xl font-bold ">Countries</h1>
+            <div className="flex justify-center">
+                {/*the pop up component*/}
+                {selectedCountry &&
+                    <div id="country-popup" className="fixed left-64 shadow-md p-4 rounded">
+
+                        <div>
+                            <h1 className="font-bold text-lg">{selectedCountry.id}</h1>
+                            <ul>
+                                <li>Biggest Producer: {selectedCountry.largestMethod}</li>
+                                <li>Energy Total: {Math.trunc(selectedCountry.energyTotal)} TWh</li>
+                            </ul>
                         </div>
-                    }
-                    )
+
+                    </div>
                 }
+
+                <div id="visualization"></div>
+
+                <div id="color-map" className="fixed right-0 flex flex-col space-y-1">
+                    {
+                        // Add a div for each color in prductionColors
+                        Object.keys(productionMethods).map((key: string) => {
+                            const methodName: string = productionMethods[Number(key)];
+                            const color: string = productionColors[Number(productionColorMap.get(methodName))];
+                            const textColor: string = methodName === "Coal" || methodName === "Hydro" || methodName === "Oil" || methodName === "Natural gas" ? "white" : "black";
+                            return <div key={methodName} className="color-map-entry">
+                                <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100" style={{ backgroundColor: color, color: textColor }}>{methodName}</div>
+                            </div>
+                        }
+                        )
+                    }
+                </div>
             </div>
         </div>
     );
