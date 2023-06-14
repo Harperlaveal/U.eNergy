@@ -220,7 +220,7 @@ export const SimilarCountriesPage = () => {
                 var difference: number = Math.abs(totalEnergyA - totalEnergyB);
                 var range: number = largestCountryTotal.amount - smallestCountryTotal.amount;
                 var normalizedDifference: number = difference / range;
-                return normalizedDifference;
+                return 3*(1 - normalizedDifference);
             };
 
             const calculateCountrySimilarityExotic: (countryA: string, countryB: string) => number = (countryA: string, countryB: string) => {
@@ -266,7 +266,7 @@ export const SimilarCountriesPage = () => {
                 magnitudeA = Math.sqrt(magnitudeA);
                 magnitudeB = Math.sqrt(magnitudeB);
                 var cosineSimilarity: number = dotProduct / (magnitudeA * magnitudeB);
-                const similarityThreshold: number = 0.8; // The closer to 1, the more similar the countries are
+                const similarityThreshold: number = 0.85; // The closer to 1, the more similar the countries are
                 if (cosineSimilarity < similarityThreshold) {
                     return false;
                 }
