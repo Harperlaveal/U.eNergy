@@ -50,6 +50,8 @@ interface Country {
     energyTotal: number
 }
 
+
+
 // export a component that has a div with header inside that says countries
 export const SimilarCountriesPage = () => {
 
@@ -119,6 +121,8 @@ export const SimilarCountriesPage = () => {
                 return { country: country, biggestProducer: biggestMethod, amount: amount, color: productionColors[colorIndex], id: country, group: colorIndex, totalEnergy: totalEnergy };
             }
             );
+            // log the size of countries
+            console.log(countries.length);
             console.log(countryTotals); // Country totals ends up being used as the nodes in the graph later in this function.
 
             const largestCountryTotal = countryTotals.reduce((a, b) => a.amount > b.amount ? a : b);
@@ -218,8 +222,6 @@ export const SimilarCountriesPage = () => {
                 var normalizedDifference: number = difference / range;
                 return normalizedDifference;
             };
-
-
 
             // var temp:number = 0/100; // 0
             // var temp2:number = 0/0; // NaN
