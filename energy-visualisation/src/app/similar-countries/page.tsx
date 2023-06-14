@@ -238,10 +238,15 @@ export const SimilarCountriesPage = () => {
                 return {source: String(edge.source), target: String(edge.target), value: Number(edge.value)} as d3.SimulationLinkDatum<d3.SimulationNodeDatum>;
             });
 
+            const radius: number = 5;
+
             const simulation = d3.forceSimulation(nodes).
                 force("link", d3.forceLink(links).id((d: any) => d.id)).
                 force("charge", d3.forceManyBody()).
-                force("center", d3.forceCenter(width / 2, height / 2)).on("tick", ticked);
+                force("center", d3.forceCenter(width / 2, height / 2)).
+                force("x", d3.forceX().x(d => Math.max(radius, Math.min(width - radius, Number(d.x))))).
+                force("y", d3.forceY().y(d => Math.max(radius, Math.min(height - radius, Number(d.y))))).
+                on("tick", ticked);
 
             const container = d3.select("#visualization");
             const svg = container.append("svg").
