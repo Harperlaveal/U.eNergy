@@ -3,6 +3,7 @@ import { EnergyProductionData } from "../interfaces";
 import Slider from "@mui/material/Slider";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
+import LineGraph from "./line-graph";
 
 interface TimelineProps {
   data: EnergyProductionData[];
@@ -71,6 +72,7 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
 
   return (
     <div className="mt-8 w-full relative">
+      <LineGraph data={data} selectedYear={value} />
       <button onClick={handlePlay}>
         {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
       </button>
@@ -97,10 +99,8 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
       <div className="flex justify-between text-xs w-full">
         {data.map((d, i) => (
           <button
-            className={` hover:text-blue-400 ${
-              d.year === value
-                ? "text-blue-500 "
-                : ""
+            className={`hover:text-blue-400 ${
+              d.year === value ? "text-blue-500" : ""
             }`}
             onClick={() => {
               setIndex(i);
