@@ -3,6 +3,7 @@ import CountryViewer from "../components/country-viewer";
 import { CountryDataProvider } from "../contexts/country-data-context";
 import CountrySelector from "../components/country-selector";
 import { Card, CardContent } from "@mui/material";
+import CountryStats from "../components/country-stats";
 
 export default function CountryPage({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -14,13 +15,15 @@ export default function CountryPage({ params }: { params: { id: string } }) {
       <CountryDataProvider>
         <h1 className="text-4xl font-semi-bold mb-6">{countryName}</h1>
         <div className="flex flex-row space-x-2">
-          <div className="pb-8 px-24 pt-4 shadow-xl w-[80%] min-h-[700px] items-center rounded-xl">
+          <div className="pb-8 px-24 pt-4 shadow-xl min-w-[80%] min-h-[700px] items-center rounded-xl">
             <CountryViewer countryName={countryName} />
           </div>
           <div className="flex flex-col flex-grow space-y-4 ">
             <CountrySelector id={id} />
             <Card className="flex-grow">
-              <CardContent>Stats</CardContent>
+              <CardContent>
+                <CountryStats countryName={countryName} />
+              </CardContent>
             </Card>
           </div>
         </div>
