@@ -442,7 +442,7 @@ export const SimilarCountriesPage = () => {
       console.log(edges);
 
       // ================ time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork) ======================
-      const width: number = 750;
+      const width: number = 1000;
       const height: number = 750;
       // convert the country instances to nodes
       const nodes: d3.SimulationNodeDatum[] = countryTotals.map((country) => {
@@ -594,34 +594,58 @@ export const SimilarCountriesPage = () => {
   /*This argument causes this function to be recalled if the selected year or similarity threshold changes*/
 
   return (
-    <div className=" flex flex-col items-center pt-32  w-full overflow-hidden">
-      <h1 className="text-4xl font-bold z-10">Countries</h1>
-      <div className="flex justify-center">
-        <div id="visualization" className=""></div>
+    <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
+      <div className="flex flex-col w-[90%] items-center h-full">
+        <h1 className="text-4xl font-bold z-10">Countries</h1>
+        <div className="flex flex-col">
+          <div id="visualization"></div>
 
-        {/*the pop up component*/}
-        {selectedCountry && (
-          <div
-            id="country-popup"
-            className="fixed left-64 shadow-md p-4 rounded"
-          >
-            <div>
-              <Link href={`/country/${selectedCountry.id}`}>
-                <h1 className="font-bold text-lg hover:underline">
-                  {selectedCountry.id}
-                </h1>
-              </Link>
-              <ul>
-                <li>Biggest Producer: {selectedCountry.largestMethod}</li>
-                <li>
-                  Energy Total: {Math.trunc(selectedCountry.energyTotal)} TWh
-                </li>
-              </ul>
+          {/*the pop up component*/}
+          {selectedCountry && (
+            <div
+              id="country-popup"
+              className="fixed left-72 shadow-md p-4 rounded"
+            >
+              <div>
+                <Link href={`/country/${selectedCountry.id}`}>
+                  <h1 className="font-bold text-lg hover:underline">
+                    {selectedCountry.id}
+                  </h1>
+                </Link>
+                <ul>
+                  <li>Biggest Producer: {selectedCountry.largestMethod}</li>
+                  <li>
+                    Energy Total: {Math.trunc(selectedCountry.energyTotal)} TWh
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        )}
-
-        <div id="color-map" className="fixed right-0 flex flex-col space-y-1">
+          )}
+          {years.length > 0 && (
+            <div
+              id="year-list"
+              className="fixed bottom-0 flex mb-4 flex-row p-2 rounded-full border shadow-lg"
+            >
+              {years.map((y: string) => {
+                return (
+                  <div key={y} className="year-list-entry">
+                    <div
+                      className={`year-list-year p-4 font-medium rounded opacity-90 hover:opacity-100 cursor-pointer hover:underline  ${
+                        y === year ? " text-blue-500 underline " : " "
+                      } `}
+                      onClick={() => setYear(y)}
+                    >
+                      {y}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-col flex-grow space-y-1 p-5 rounded-lg shadow-xl z-10">
+        <div id="color-map" className="flex-grow flex flex-col space-y-1">
           {
             // Add a div for each color in prductionColors
             Object.keys(productionMethods).map((key: string) => {
@@ -647,82 +671,64 @@ export const SimilarCountriesPage = () => {
               );
             })
           }
-          {
-            // add a div that states the current similarity threshold
-            // make the text bold
-            <Tooltip
-              arrow
-              title="The similarity required between two countries' energy production distribution before they are connected in the graph"
-            >
-              <div className="color-map-entry border border-black cursor-pointer">
-                <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
-                  <div className="flex flex-row space-x-2">
-                    <p className="font-bold">
-                      Similarity: {similarityThreshold.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Tooltip>
-          }
-          {
-            // add a div that contains two buttons, one for decreasing the similarity threshold, one for increasing the similarity threshold
-            <div className="color-map-entry">
+        </div>
+        {
+          // add a div that states the current similarity threshold
+          // make the text bold
+          <Tooltip
+            arrow
+            title="The similarity required between two countries' energy production distribution before they are connected in the graph"
+          >
+            <div className="color-map-entry border border-black cursor-pointer">
               <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
                 <div className="flex flex-row space-x-2">
-                  <Tooltip
-                    arrow
-                    title="Countries with less similarity between their energy generation methods are clumped together"
-                  >
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                      onClick={() => {
-                        if (similarityThreshold > minThreshold)
-                          setSimilarityThreshold(
-                            similarityThreshold - incrementAmount
-                          );
-                      }}
-                    >
-                      Less Similarity
-                    </button>
-                  </Tooltip>
-                  <Tooltip
-                    arrow
-                    title="Countries with more similarity between their energy generation methods are clumped together"
-                  >
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                      onClick={() => {
-                        if (similarityThreshold < maxThreshold)
-                          setSimilarityThreshold(
-                            similarityThreshold + incrementAmount
-                          );
-                      }}
-                    >
-                      More Similarity
-                    </button>
-                  </Tooltip>
+                  <p className="font-bold">
+                    Similarity: {similarityThreshold.toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>
-          }
-        </div>
+          </Tooltip>
+        }
         {
-          <div id="year-list" className="fixed bottom-0 flex flex-row ">
-            {years.map((y: string) => {
-              return (
-                <div key={y} className="year-list-entry">
-                  <div
-                    className={`year-list-year p-4 font-medium rounded opacity-90 hover:opacity-100 cursor-pointer hover:underline  ${
-                      y === year ? " text-blue-500 underline " : " text-black"
-                    } `}
-                    onClick={() => setYear(y)}
+          // add a div that contains two buttons, one for decreasing the similarity threshold, one for increasing the similarity threshold
+          <div className="color-map-entry">
+            <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
+              <div className="flex flex-row space-x-2">
+                <Tooltip
+                  arrow
+                  title="Countries with less similarity between their energy generation methods are clumped together"
+                >
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => {
+                      if (similarityThreshold > minThreshold)
+                        setSimilarityThreshold(
+                          similarityThreshold - incrementAmount
+                        );
+                    }}
                   >
-                    {y}
-                  </div>
-                </div>
-              );
-            })}
+                    Less Similarity
+                  </button>
+                </Tooltip>
+                <Tooltip
+                  arrow
+                  title="Countries with more similarity between their energy generation methods are clumped together"
+                >
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => {
+                      if (similarityThreshold < maxThreshold)
+                        setSimilarityThreshold(
+                          similarityThreshold + incrementAmount
+                        );
+                    }}
+                  >
+                    More Similarity
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
           </div>
         }
       </div>
