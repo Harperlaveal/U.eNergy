@@ -17,7 +17,7 @@
 import React, { use, useEffect, useState } from "react";
 import * as d3 from "d3";
 import Link from "next/link";
-import { select } from "d3";
+import { Tooltip } from "@mui/material";
 
 /**
  * An array of strings that represent the different energy production methods
@@ -619,8 +619,6 @@ export const SimilarCountriesPage = () => {
           </div>
         )}
 
-        
-
         <div id="color-map" className="fixed right-0 flex flex-col space-y-1">
           {
             // Add a div for each color in prductionColors
@@ -650,48 +648,58 @@ export const SimilarCountriesPage = () => {
           {
             // add a div that states the current similarity threshold
             // make the text bold
-            <div
-              className="color-map-entry border border-black"
+            <Tooltip
+              arrow
               title="The similarity required between two countries' energy production distribution before they are connected in the graph"
             >
-              <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
-                <div className="flex flex-row space-x-2">
-                  <p className="font-bold">
-                    Similarity: {similarityThreshold.toFixed(2)}
-                  </p>
+              <div className="color-map-entry border border-black cursor-pointer">
+                <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
+                  <div className="flex flex-row space-x-2">
+                    <p className="font-bold">
+                      Similarity: {similarityThreshold.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Tooltip>
           }
           {
             // add a div that contains two buttons, one for decreasing the similarity threshold, one for increasing the similarity threshold
             <div className="color-map-entry">
               <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
                 <div className="flex flex-row space-x-2">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => {
-                      if (similarityThreshold > minThreshold)
-                        setSimilarityThreshold(
-                          similarityThreshold - incrementAmount
-                        );
-                    }}
+                  <Tooltip
+                    arrow
                     title="Countries with less similarity between their energy generation methods are clumped together"
                   >
-                    Less Similarity
-                  </button>
-                  <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => {
-                      if (similarityThreshold < maxThreshold)
-                        setSimilarityThreshold(
-                          similarityThreshold + incrementAmount
-                        );
-                    }}
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      onClick={() => {
+                        if (similarityThreshold > minThreshold)
+                          setSimilarityThreshold(
+                            similarityThreshold - incrementAmount
+                          );
+                      }}
+                    >
+                      Less Similarity
+                    </button>
+                  </Tooltip>
+                  <Tooltip
+                    arrow
                     title="Countries with more similarity between their energy generation methods are clumped together"
                   >
-                    More Similarity
-                  </button>
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      onClick={() => {
+                        if (similarityThreshold < maxThreshold)
+                          setSimilarityThreshold(
+                            similarityThreshold + incrementAmount
+                          );
+                      }}
+                    >
+                      More Similarity
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
             </div>
