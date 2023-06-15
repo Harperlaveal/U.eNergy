@@ -1,8 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
+import { EnergyProductionData, EnergySourceProduction } from '@/app/country/interfaces';
+import { CountryDataContext } from '@/app/country/contexts/country-data-context';
 
 interface BarChartProps {
-  countryTotals: { country: string; amount: number; id: string; }[];
+  countryData: {
+    [country: string]: EnergyProductionData[];
+  }
   countryCount: number;
   year: number;
   setSelectedCountry: React.Dispatch<React.SetStateAction<{ country: string; amount: number; id: string; } | null>>;
@@ -10,13 +14,27 @@ interface BarChartProps {
 
 const productionColors: string[] = ["#1F77B4", "#FEF502", "#F4BF3A", "#D1F1F9", "#79E381", "#DE2A2A", "#000000", "#6A4848"];
 
-const BarChart: React.FC<BarChartProps> = ({ countryTotals, countryCount, year, setSelectedCountry }) => {
+const BarChart: React.FC<BarChartProps> = ({ countryData, countryCount, year, setSelectedCountry }) => {
   const ref = useRef<SVGSVGElement | null>(null);
 
-  const maxYValue = Math.max(...countryTotals.slice(0, countryCount).map(d => d.amount));
+    const countries = Object.keys(countryData);
+  // Calculate the total watt production for each country for the specified year.
+  const totals = countries.map((country: string | number) => {
+    const countryYearData = countryData[country].find(data => data.year === year.toString());
+    let totalWatts = 0;
+    if (countryYearData) {
+      totalWatts = countryYearData.production.reduce((total, source) => total + Number(source.watts), 0);
+    }
+    return { amount: totalWatts, id: country };
+  });
+  // sort totals in descending order then remove N countries, N being countryCount
+    totals.sort((a: { amount: number; }, b: { amount: number; }) => b.amount - a.amount);
+    totals.splice(countryCount);
+
+  const maxYValue = Math.max(...totals.map((d: { amount: any; }) => d.amount));
   const yScale = d3.scaleLinear().domain([0, maxYValue]).range([160, 0]);
   const xScale = d3.scaleBand<string>()
-    .domain(countryTotals.slice(0, countryCount).map(d => d.country))
+    .domain(totals.map((d: { id: any; }) => d.id))
     .range([0, countryCount * 50])
     .padding(0.2);
 
@@ -28,10 +46,10 @@ const BarChart: React.FC<BarChartProps> = ({ countryTotals, countryCount, year, 
 
     const yAxis = d3.axisLeft(yScale);
     svg.append('g')
-      .attr('class', 'y-axis') 
+      .attr('class', 'y-axis')
       .attr('transform', 'translate(60, 20)')
       .call(yAxis);
-  }, [ref, yScale, countryTotals]);
+  }, [ref, yScale, totals]);
 
   return (
     <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${countryCount * 50 + 80} 200`}>
@@ -46,17 +64,17 @@ const BarChart: React.FC<BarChartProps> = ({ countryTotals, countryCount, year, 
         <text x="-10" y="-10" fontSize="12">Total Watts Produced (GWh)</text>
 
         {/* Bar chart */}
-        {countryTotals.slice(0, countryCount).map((country, index) => (
-          <g key={country.id} transform={`translate(${index * 50}, 0)`}>
+        {totals.map((total: React.SetStateAction<{amount: number; id: string; } | null>, index: number) => (
+          <g key={total.id} transform={`translate(${index * 50}, 0)`}>
             <rect
               x="0"
-              y={yScale(country.amount) - 1}
+              y={yScale(total.amount) - 1}
               width={xScale.bandwidth()}
-              height={160 - yScale(country.amount)}
+              height={160 - yScale(total.amount)}
               fill={productionColors[index]}
-              onClick={() => setSelectedCountry(country)}
+              onClick={() => setSelectedCountry(total)}
             />
-            <text x={xScale.bandwidth() / 2} y={170} fontSize="5" textAnchor="middle">{country.country}</text>
+            <text x={xScale.bandwidth() / 2} y={170} fontSize="5" textAnchor="middle">{total.id}</text>
           </g>
         ))}
       </g>
