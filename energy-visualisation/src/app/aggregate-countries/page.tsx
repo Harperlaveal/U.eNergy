@@ -16,7 +16,8 @@ const SimilarCountriesPage = () => {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [countryTotals, setCountryTotals] = useState<Country[]>([]);
   const [countryCount, setCountryCount] = useState<number>(10);
-  const [year, setYear] = useState<number>(2018);
+  const [year, setYear] = useState<number>(2022);
+  const [years, setYears] = useState<string[]>(['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2020', '2021', '2022']);
 
   useEffect(() => {
     d3.csv("data/data.csv").then((data) => {
@@ -24,7 +25,7 @@ const SimilarCountriesPage = () => {
       const countries = Array.from(new Set(data.map((d) => String(d.COUNTRY))));
 
       const totals = countries.map((country) => {
-        const countryInstances = instances.filter((d) => String(d.COUNTRY) === country);
+        const countryInstances = instances.filter((d) => String(d.COUNTRY) === country && Number(d.YEAR) === year);
         const totalEnergy: number = countryInstances.reduce((a, b) => a + Number(b.VALUE), 0);
 
         return { country, amount: totalEnergy, id: country };
@@ -33,7 +34,7 @@ const SimilarCountriesPage = () => {
       totals.sort((a, b) => b.amount - a.amount);
       setCountryTotals(totals);
     });
-  }, []);
+  }, [year]);
 
   const maxYValue = Math.max(...countryTotals.slice(0, countryCount).map(d => d.amount));
   const yScale = d3.scaleLinear().domain([0, maxYValue]).range([160, 0]);
@@ -53,7 +54,7 @@ const SimilarCountriesPage = () => {
   }, [ref, yScale]);
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex flex-col justify-center items-center h-screen">
       <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${countryCount * 50 + 80} 200`}>
         <g transform="translate(60, 20)">
           {/* X-axis */}
@@ -70,7 +71,7 @@ const SimilarCountriesPage = () => {
             <g key={country.id} transform={`translate(${index * 50}, 0)`}>
               <rect
                 x="0"
-                y={yScale(country.amount)}
+                y={yScale(country.amount) - 1}
                 width={xScale.bandwidth()}
                 height={160 - yScale(country.amount)}
                 fill={productionColors[index]}
@@ -81,6 +82,14 @@ const SimilarCountriesPage = () => {
           ))}
         </g>
       </svg>
+      <div className="flex justify-center mt-4">
+        <h1 className="text-2xl font-bold mr-4">Timeline</h1>
+        <div className="flex space-x-2">
+          {years.map((year) => (
+            <button key={year} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => setYear(Number(year))}>{year}</button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
