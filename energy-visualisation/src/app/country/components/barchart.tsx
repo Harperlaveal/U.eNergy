@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext } from "react";
+import React, { useRef, useEffect, useContext, useState } from "react";
 import {
   select,
   scaleBand,
@@ -24,6 +24,7 @@ export default function BarChart({ data, max }: BarChartProps) {
   const isDarkMode = theme === "dark";
   const labelColor = isDarkMode ? "white" : "black";
   const tooltipBackgroundColor = isDarkMode ? "black" : "white";
+  const [activeItem, setActiveItem] = useState<string | null>(null);
 
   const colorScale = scaleOrdinal<string>()
     .domain(energySources)
@@ -100,8 +101,14 @@ export default function BarChart({ data, max }: BarChartProps) {
 
     yLabels
       .style("cursor", "pointer")
-      .on("mouseover", function () {
+      .on("mouseover", function (event, d) {
         tooltip.style("visibility", "visible");
+        const correspondingData = data.production.find(
+          (item) => item.source === d
+        );
+        if (correspondingData) {
+          setActiveItem(correspondingData.source);
+        }
       })
       .on("mousemove", function (event, d) {
         // Find the corresponding data for this y-axis label
@@ -138,11 +145,12 @@ export default function BarChart({ data, max }: BarChartProps) {
       .attr("width", 0) // Initial width is 0
       .attr("height", yScale.bandwidth())
       .attr("fill", colorFn)
-      .attr("fill-opacity", "0.5")
+      .attr("fill-opacity", 0.5)
       .attr("stroke", colorFn)
-      .on("mouseover", function () {
+      .on("mouseover", function (event, d) {
         select(this).style("fill-opacity", 0.8);
         select(this).style("cursor", "pointer");
+        setActiveItem(d.source);
       })
       .on("mousemove", function (event, d) {
         tooltip
@@ -154,6 +162,7 @@ export default function BarChart({ data, max }: BarChartProps) {
       .on("mouseout", function () {
         tooltip.style("visibility", "hidden");
         select(this).style("fill-opacity", 0.5);
+        setActiveItem(null);
       })
       .merge(bars)
       .transition(t)
@@ -168,6 +177,24 @@ export default function BarChart({ data, max }: BarChartProps) {
       tooltip.style("visibility", "hidden");
     };
   }, [data, theme]);
+
+  interface LegendItemProps {
+    color: string;
+    label: string;
+    isActive: boolean;
+  }
+
+  const LegendItem = ({ color, label, isActive }: LegendItemProps) => (
+    <div className="flex  justify-start">
+      <div
+        className={`w-4 h-4 rounded-full mr-4  hover:opacity-100 ${
+          isActive ? "opacity-100" : "opacity-50"
+        }`}
+        style={{ backgroundColor: color }}
+      ></div>
+      <div className="text-xs">{label}</div>
+    </div>
+  );
 
   return (
     <div className="flex flex-row w-full">
@@ -186,25 +213,19 @@ export default function BarChart({ data, max }: BarChartProps) {
           <h1 className="text-lg ">Amount Produced (Terrawatt Hours)</h1>
         </div>
       </div>
-      <div className="w-[200px]">
-        {energySources.map((source, index) => (
-          <LegendItem
-            key={source}
-            color={colorScale(source) as string}
-            label={source}
-          />
-        ))}
+      <div className="overflow-visible no-wrap relative right-[-75px] flex flex-col items-center space-y-2">
+        <h3 className="text-xs">Most to least renewable</h3>
+        <div className="space-y-2">
+          {energySources.map((source, index) => (
+            <LegendItem
+              key={index}
+              color={colorScale(source) as string}
+              label={source}
+              isActive={source === activeItem}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-const LegendItem = ({ color, label }: { color: string; label: string }) => (
-  <div className="flex items-center mb-2">
-    <div
-      className="w-4 h-4 rounded-full mr-4 opacity-50 hover:opacity-100"
-      style={{ backgroundColor: color }}
-    ></div>
-    <span>{label}</span>
-  </div>
-);
