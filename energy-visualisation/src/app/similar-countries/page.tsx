@@ -17,6 +17,7 @@
 import React, { use, useEffect, useState } from "react";
 import * as d3 from "d3";
 import Link from "next/link";
+import { select } from "d3";
 
 /**
  * An array of strings that represent the different energy production methods
@@ -441,7 +442,6 @@ export const SimilarCountriesPage = () => {
       console.log(edges);
 
       // ================ time to make the d3 force simulation graph (https://observablehq.com/@d3/force-directed-graph/2?intent=fork) ======================
-
       const width: number = 750;
       const height: number = 750;
       // convert the country instances to nodes
@@ -519,6 +519,8 @@ export const SimilarCountriesPage = () => {
         .attr("viewBox", [0, 0, width, height])
         .attr("width", width)
         .attr("height", height)
+        .attr("overflow", "visible")
+        .attr("overflow-x", "clip")
         .attr("preserveAspectRatio", "xMidYMid meet")
         .attr("style", "max-width: 100%; height: auto;")
         // @ts-ignore
@@ -547,7 +549,6 @@ export const SimilarCountriesPage = () => {
           setSelectedCountry(d as Country);
           console.log(d);
         });
-
       node.append("title").text((d: any) => d.id);
 
       // This causes a type error but I don't know how to solve it. The actual code works fine, so I'm just ignoring the error here.
@@ -602,7 +603,9 @@ export const SimilarCountriesPage = () => {
           >
             <div>
               <Link href={`/country/${selectedCountry.id}`}>
-                <h1 className="font-bold text-lg hover:underline">{selectedCountry.id}</h1>
+                <h1 className="font-bold text-lg hover:underline">
+                  {selectedCountry.id}
+                </h1>
               </Link>
               <ul>
                 <li>Biggest Producer: {selectedCountry.largestMethod}</li>
