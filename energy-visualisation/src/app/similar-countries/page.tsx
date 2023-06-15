@@ -596,7 +596,7 @@ export const SimilarCountriesPage = () => {
   return (
     <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
       <div className="flex flex-col w-[90%] items-center h-full">
-        <h1 className="text-4xl font-bold z-10">Countries</h1>
+        <h1 className="text-4xl font-bold z-10">Similar Countries</h1>
         <div className="flex flex-col">
           <div id="visualization"></div>
 

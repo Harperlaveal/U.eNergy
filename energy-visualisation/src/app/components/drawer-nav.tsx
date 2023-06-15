@@ -7,13 +7,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import HomeIcon from "@mui/icons-material/Home";
-import EyeIcon from "@mui/icons-material/RemoveRedEye";
 import EarthIcon from "@mui/icons-material/Public";
 import FlagIcon from "@mui/icons-material/Flag";
 import GroupIcon from "@mui/icons-material/Workspaces";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Image from "next/image";
+import ViewQuiltIcon from "@mui/icons-material/ViewQuilt";
 import MuiDrawer from "@mui/material/Drawer";
 import { styled } from "@mui/material";
 import { openedMixin, closedMixin } from "./layout";
@@ -61,31 +60,30 @@ interface NavItem {
 // List of Nav Items to be displayed in the Drawer
 const NavItemList: NavItem[] = [
   {
-    title: "Home",
+    title: "Welcome",
     href: "/",
     icon: <HomeIcon />,
   },
+
   {
-    title: "Visualisations",
-    isHeading: true,
-    icon: <EyeIcon />,
-    subitems: [
-      {
-        title: "By Country",
-        href: "/country",
-        icon: <FlagIcon />,
-      },
-      {
-        title: "By Similarities",
-        href: "/similar-countries",
-        icon: <GroupIcon />,
-      },
-      {
-        title: "By Sustainability",
-        href: "",
-        icon: <EarthIcon />,
-      },
-    ],
+    title: "Country Profile",
+    href: "/country",
+    icon: <FlagIcon />,
+  },
+  {
+    title: "Global Trends",
+    href: "",
+    icon: <EarthIcon />,
+  },
+  {
+    title: "Production Groups",
+    href: "/similar-countries",
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Production Hierarchy",
+    href: "",
+    icon: <ViewQuiltIcon />,
   },
 ];
 
@@ -111,37 +109,44 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
       open: boolean;
     }) {
       return (
-        <ListItem
-          disablePadding
-          className={
-            item.href && isActive(item.href) ? "bg-primary bg-opacity-30" : " "
-          }
-          sx={{
-            display: "block",
-          }}
-          divider={item.isHeading === true}
-        >
-          <ListItemButton
-            disableRipple
+        <>
+          <ListItem
+            disablePadding
+            className={
+              item.href && isActive(item.href)
+                ? "bg-primary bg-opacity-30"
+                : " "
+            }
             sx={{
-              minHeight: 48,
-              justifyContent: open ? "initial" : "center",
-              px: 2.5,
+              display: "block",
             }}
+            divider={item.isHeading === true}
           >
-            <ListItemIcon
+            <ListItemButton
+              disableRipple
               sx={{
-                minWidth: 0,
-                mr: open ? 3 : "auto",
-                justifyContent: "center",
-                color: theme === "light" ? muiTheme.palette.vuwGreen : "",
+                minHeight: 48,
+                justifyContent: open ? "initial" : "center",
+                px: 2.5,
               }}
             >
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.title} sx={{ opacity: open ? 1 : 0 }} />
-          </ListItemButton>
-        </ListItem>
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: open ? 3 : "auto",
+                  justifyContent: "center",
+                  color: theme === "light" ? muiTheme.palette.vuwGreen : "",
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.title}
+                sx={{ opacity: open ? 1 : 0 }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </>
       );
     }
 
@@ -164,17 +169,8 @@ export default function DrawerNav({ toggleOpen, open }: DrawerNavProps) {
 
   return (
     <Drawer variant="permanent" open={open}>
-      {/* Drawer Header */}
-      <div className="h-24 bg-vuwGreen justify-center">
-        <div className="flex  h-full items-center justify-center">
-          <Image
-            src="/unplugged-logo.png"
-            alt="Unplugged Logo"
-            width={150}
-            height={150}
-          />
-        </div>
-      </div>
+      {/* Pseudo margin */}
+      <div className="h-24" />
       {/* Open and Close Menu Button */}
       <ListItem
         key={"hamburger"}

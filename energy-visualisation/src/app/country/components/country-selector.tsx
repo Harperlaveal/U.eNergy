@@ -32,11 +32,11 @@ export default function CountrySelector({ id }: CountrySelectorProps) {
   };
 
   return (
-    <Card className="w-full p-4">
-      <CardContent>
+    <Card className="h-auto">
+      <CardContent className="flex flex-col space-y-4">
         <h2 className="text-xl font-bold">Select Country</h2>
         <AutoComplete
-          className="mt-4"
+          className="shadow-md"
           options={countryList}
           getOptionLabel={(countryName) => countryName}
           filterOptions={(options, params) => {

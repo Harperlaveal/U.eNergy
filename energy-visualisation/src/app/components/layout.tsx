@@ -21,30 +21,9 @@ interface AppBarProps extends MuiAppBarProps {
 // Styled MuiAppBar whose styles change on open / close
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
-})<AppBarProps>(({ theme, open }) => ({
-  position: "absolute",
+})<AppBarProps>(({ theme }) => ({
+  position: "fixed",
   zIndex: theme.zIndex.drawer + 1,
-  ...(open
-    ? {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(["width", "margin"], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-      }
-    : {
-        marginLeft: `calc(${theme.spacing(7)} + 1px)`,
-        width: `calc(100% - calc(${theme.spacing(7)} + 1px))`,
-        [theme.breakpoints.up("sm")]: {
-          marginLeft: `calc(${theme.spacing(8)} + 1px)`,
-          width: `calc(100% - calc(${theme.spacing(8)} + 1px))`,
-        },
-        transition: theme.transitions.create(["width", "margin"], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-      }),
 }));
 
 // Styles for the Drawer when open
@@ -85,16 +64,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <AppBar
-          position="fixed"
-          open={open}
-        >
+        <AppBar position="sticky" open={open}>
           <TopAppBar className="h-24" />
         </AppBar>
 
         <DrawerNav toggleOpen={toggleOpen} open={open} />
 
-        <Box component="main" sx={{ flexGrow: 1}}>
+        <Box component="main" sx={{ flexGrow: 1 }}>
           {children}
         </Box>
       </Box>

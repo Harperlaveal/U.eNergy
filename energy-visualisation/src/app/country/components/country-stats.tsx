@@ -48,7 +48,7 @@ export default function CountryStats({ countryName }: CountryStatsProps) {
   }
 
   return (
-    <div className="flex flex-col space-y-2 p-2">
+    <div className="flex flex-col space-y-1 p-1">
       <h2 className="text-lg font-bold">Since {year}</h2>
       <div className="spacy-y-1 text-sm">
         <h3 className="font-medium ">Biggest producer</h3>
