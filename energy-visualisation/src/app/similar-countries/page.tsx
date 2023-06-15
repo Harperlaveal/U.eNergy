@@ -595,6 +595,8 @@ export const SimilarCountriesPage = () => {
     <div className=" flex flex-col items-center pt-32  w-full">
       <h1 className="text-4xl font-bold ">Countries</h1>
       <div className="flex justify-center">
+        <div id="visualization"></div>
+
         {/*the pop up component*/}
         {selectedCountry && (
           <div
@@ -617,7 +619,7 @@ export const SimilarCountriesPage = () => {
           </div>
         )}
 
-        <div id="visualization"></div>
+        
 
         <div id="color-map" className="fixed right-0 flex flex-col space-y-1">
           {
