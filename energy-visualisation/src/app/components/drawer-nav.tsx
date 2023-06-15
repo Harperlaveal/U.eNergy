@@ -72,7 +72,7 @@ const NavItemList: NavItem[] = [
     subitems: [
       {
         title: "By Country",
-        href: "",
+        href: "/country",
         icon: <FlagIcon />,
       },
       {
