@@ -1,63 +1,88 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-export default function AggregateCountries() {
-    const chartContainerRef = useRef<SVGSVGElement | null>(null);
+const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
+const productionColors: string[] = ["#1F77B4", "#FEF502", "#F4BF3A", "#D1F1F9", "#79E381", "#DE2A2A", "#000000", "#6A4848"];
 
-    useEffect(() => {
-    // Use the D3 library to load the data file
-    d3.csv('data/data.csv').then((data: any[]) => {
-      // Convert data to numeric values
-      data.forEach((d: { value: number; }) => {
-        d.value = +d.value;
+interface Country {
+  country: string;
+  amount: number;
+  id: string;
+}
+
+const SimilarCountriesPage = () => {
+  const ref = useRef<SVGSVGElement | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [countryTotals, setCountryTotals] = useState<Country[]>([]);
+  const [countryCount, setCountryCount] = useState<number>(10);
+  const [year, setYear] = useState<number>(2018);
+
+  useEffect(() => {
+    d3.csv("data/data.csv").then((data) => {
+      const instances = data.filter((d) => productionMethods.includes(String(d.PRODUCT)));
+      const countries = Array.from(new Set(data.map((d) => String(d.COUNTRY))));
+
+      const totals = countries.map((country) => {
+        const countryInstances = instances.filter((d) => String(d.COUNTRY) === country);
+        const totalEnergy: number = countryInstances.reduce((a, b) => a + Number(b.VALUE), 0);
+
+        return { country, amount: totalEnergy, id: country };
       });
 
-      // Set up chart dimensions
-      const width = 400;
-      const height = 300;
-      const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-
-      // Create SVG element
-      const svg = d3
-        .select(chartContainerRef.current)
-        .append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
-
-      // Define scales for x and y axes
-      const xScale = d3
-        .scaleBand()
-        .domain(data.map((d: { country: any; }) => d.country))
-        .range([0, width])
-        .padding(0.1);
-
-      const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(data, (d: { value: any; }) => d.value)!])
-        .range([height, 0]);
-
-      // Create and append bars
-      svg
-        .selectAll('rect')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('x', (d: { country: any; }) => xScale(d.country)!)
-        .attr('y', (d: { value: any; }) => yScale(d.value)!)
-        .attr('width', xScale.bandwidth())
-        .attr('height', (d: { value: any; }) => height - yScale(d.value)!)
-        .attr('fill', 'steelblue');
+      totals.sort((a, b) => b.amount - a.amount);
+      setCountryTotals(totals);
     });
   }, []);
 
+  const maxYValue = Math.max(...countryTotals.slice(0, countryCount).map(d => d.amount));
+  const yScale = d3.scaleLinear().domain([0, maxYValue]).range([160, 0]);
+  const xScale = d3.scaleBand<string>()
+  .domain(countryTotals.slice(0, countryCount).map(d => d.country))
+  .range([0, countryCount * 50])
+  .padding(0.2);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const svg = d3.select(ref.current);
+
+    const yAxis = d3.axisLeft(yScale);
+    svg.append('g')
+      .attr('transform', 'translate(60, 20)')
+      .call(yAxis);
+  }, [ref, yScale]);
 
   return (
-    <div className="flex flex-col h-screen items-center justify-center w-full space-y-4">
-      <h1 className="text-3xl font-bold ">Energy Production by Country</h1>
-      <svg ref={chartContainerRef} />
+    <div className="flex justify-center items-center h-screen">
+      <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${countryCount * 50 + 80} 200`}>
+        <g transform="translate(60, 20)">
+          {/* X-axis */}
+          <line x1="0" y1="160" x2={countryCount * 60} y2="160" stroke="black" />
+          {/* Y-axis */}
+          <line x1="0" y1="160" x2="200" y2="160" stroke="black" />
+
+          {/* Axis labels */}
+          <text x="-50" y="180" fontSize="12">{year}</text>
+          <text x="-10" y="-10" fontSize="12">Total Watts Produced (GWh)</text>
+
+          {/* Bar chart */}
+          {countryTotals.slice(0, countryCount).map((country, index) => (
+            <g key={country.id} transform={`translate(${index * 50}, 0)`}>
+              <rect
+                x="0"
+                y={yScale(country.amount)}
+                width={xScale.bandwidth()}
+                height={160 - yScale(country.amount)}
+                fill={productionColors[index]}
+                onClick={() => setSelectedCountry(country)}
+              />
+              <text x={xScale.bandwidth() / 2} y={170} fontSize="5" textAnchor="middle">{country.country}</text>
+            </g>
+          ))}
+        </g>
+      </svg>
     </div>
   );
-}
+};
+
+export default SimilarCountriesPage;
