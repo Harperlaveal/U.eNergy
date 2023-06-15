@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 import { EnergyProductionData, EnergySourceProduction } from '@/app/country/interfaces';
 import { CountryDataContext } from '@/app/country/contexts/country-data-context';
-
 interface BarChartProps {
   countryData: {
     [country: string]: EnergyProductionData[];
@@ -12,7 +11,14 @@ interface BarChartProps {
   setSelectedCountry: React.Dispatch<React.SetStateAction<{ country: string; amount: number; id: string; } | null>>;
 }
 
-const productionColors: string[] = ["#1F77B4", "#FEF502", "#F4BF3A", "#D1F1F9", "#79E381", "#DE2A2A", "#000000", "#6A4848"];
+const productionColors: string[] = [
+  "#1F77B4", "#FEF502", "#F4BF3A", "#D1F1F9", "#79E381", 
+  "#DE2A2A", "#000000", "#6A4848", "#FF5733", "#AF7AC5", 
+  "#17A589", "#5499C7", "#A04000", "#922B21", "#76448A", 
+  "#1F618D", "#B7950B", "#641E16", "#D4AC0D", "#212F3C", 
+  "#A569BD", "#27AE60", "#196F3D", "#1A5276", "#D35400"
+];
+
 
 const BarChart: React.FC<BarChartProps> = ({ countryData, countryCount, year, setSelectedCountry }) => {
   const ref = useRef<SVGSVGElement | null>(null);

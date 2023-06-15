@@ -7,6 +7,7 @@ import Timeline from './components/timeline';
 import { EnergyProductionData } from '../country/interfaces';
 import { loadCSVData } from '../country/utils';
 import { createCountryData } from '../country/utils';
+import CountryScale from './components/country-scale';
 
 const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
 
@@ -25,6 +26,10 @@ const SimilarCountriesPage = () => {
   const handleYearChange = (year: number) => {
       setSelectedYear(year);
     };
+
+  const handleCountryCountChange = (count: number) => {
+      setCountryCount(count);
+  };
 
     useEffect(() => {
     loadCSVData("/data/data.csv")
@@ -45,12 +50,15 @@ const SimilarCountriesPage = () => {
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
-      <BarChart
-        countryData={countryData}
-        countryCount={countryCount}
-        year={selectedYear}
-        setSelectedCountry={() => { }}
-      />
+      <div className="flex-grow flex flex-col justify-center items-center">
+    <CountryScale countryCount={countryList.length} onCountryCountChange={handleCountryCountChange} />
+    <BarChart
+      countryData={countryData}
+      countryCount={countryCount}
+      year={selectedYear}
+      setSelectedCountry={() => { }}
+    />
+  </div>
       <Timeline
         years={years}
         onYearChange={handleYearChange}
