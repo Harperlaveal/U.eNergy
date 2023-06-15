@@ -96,6 +96,36 @@ export default function BarChart({ data, max }: BarChartProps) {
       .style("background-color", tooltipBackgroundColor)
       .style("color", labelColor);
 
+    const yLabels = yAxisG.selectAll(".tick text");
+
+    yLabels
+      .style("cursor", "pointer")
+      .on("mouseover", function () {
+        tooltip.style("visibility", "visible");
+      })
+      .on("mousemove", function (event, d) {
+        // Find the corresponding data for this y-axis label
+        const correspondingData = data.production.find(
+          (item) => item.source === d
+        );
+        if (correspondingData) {
+          tooltip
+            .style("top", `${event.pageY - 10}px`)
+            .style("left", `${event.pageX + 10}px`)
+            .style("visibility", "visible")
+            .html(
+              `Method: ${d}<br>Amount: ${Math.trunc(
+                correspondingData.watts
+              )}TWh`
+            );
+        }
+      })
+      .on("mouseout", function () {
+        tooltip.style("visibility", "hidden");
+      });
+
+    yLabels.exit().remove();
+
     const bars = svg
       .selectAll<SVGRectElement, EnergySourceProduction>("rect")
       .data(data.production, (d) => d.source);
@@ -112,6 +142,7 @@ export default function BarChart({ data, max }: BarChartProps) {
       .attr("stroke", colorFn)
       .on("mouseover", function () {
         select(this).style("fill-opacity", 0.8);
+        select(this).style("cursor", "pointer");
       })
       .on("mousemove", function (event, d) {
         tooltip
@@ -132,6 +163,10 @@ export default function BarChart({ data, max }: BarChartProps) {
       .attr("height", yScale.bandwidth());
 
     bars.exit().remove();
+
+    return () => {
+      tooltip.style("visibility", "hidden");
+    };
   }, [data, theme]);
 
   return (
