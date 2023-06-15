@@ -571,10 +571,12 @@ export const SimilarCountriesPage = () => {
         node.attr("cx", (d: any) => d.x).attr("cy", (d: any) => d.y);
       }
 
-      function dragstarted(event: any) {
+      function dragstarted(this: any, event: any) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         event.subject.fx = event.subject.x;
         event.subject.fy = event.subject.y;
+        // set cursor to grabbing
+        d3.select(this).style("cursor", "grabbing");
       }
 
       function dragged(event: any) {
@@ -592,10 +594,10 @@ export const SimilarCountriesPage = () => {
   /*This argument causes this function to be recalled if the selected year or similarity threshold changes*/
 
   return (
-    <div className=" flex flex-col items-center pt-32  w-full">
-      <h1 className="text-4xl font-bold ">Countries</h1>
+    <div className=" flex flex-col items-center pt-32  w-full overflow-hidden">
+      <h1 className="text-4xl font-bold z-10">Countries</h1>
       <div className="flex justify-center">
-        <div id="visualization"></div>
+        <div id="visualization" className=""></div>
 
         {/*the pop up component*/}
         {selectedCountry && (
