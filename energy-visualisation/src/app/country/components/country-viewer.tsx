@@ -54,7 +54,7 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
       <h1 className="text-2xl font-medium">
-        Energy Productions in the Year {selectedYear}
+        Energy Production for {countryName} in the Year {selectedYear}
       </h1>
       <BarChart
         data={

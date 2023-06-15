@@ -11,11 +11,10 @@ export default function CountryPage({ params }: { params: { id: string } }) {
   const countryName = capitalizeFirstLetter(decodeURI(id));
 
   return (
-    <div className="flex flex-col pt-32 px-16 w-full">
+    <div className="flex flex-col pt-44 px-16 w-full">
       <CountryDataProvider>
-        <h1 className="text-4xl font-semi-bold mb-6">{countryName}</h1>
         <div className="flex flex-row space-x-2">
-          <div className="pb-8 px-24 pt-4 shadow-xl min-w-[80%] min-h-[700px] items-center rounded-xl">
+          <div className="pb-16 px-24 pt-8 shadow-xl min-w-[80%] min-h-[700px] items-center rounded-xl border">
             <CountryViewer countryName={countryName} />
           </div>
           <div className="flex flex-col flex-grow space-y-4 ">

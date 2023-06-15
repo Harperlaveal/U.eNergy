@@ -99,7 +99,7 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
       <div className="flex justify-between text-xs w-full">
         {data.map((d, i) => (
           <button
-            className={`hover:text-blue-400 ${
+            className={`hover: ${
               d.year === value ? "text-blue-500" : ""
             }`}
             onClick={() => {

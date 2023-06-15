@@ -49,12 +49,12 @@ export default function CountryStats({ countryName }: CountryStatsProps) {
 
   return (
     <div className="flex flex-col space-y-2 p-2">
-      <h2 className="text-xl font-bold">Since {year}</h2>
-      <div className="spacy-y-1">
-        <h3 className="font-medium">Biggest producer</h3>
-        <div className="ml-4">{highestProdSource}</div>
+      <h2 className="text-lg font-bold">Since {year}</h2>
+      <div className="spacy-y-1 text-sm">
+        <h3 className="font-medium ">Biggest producer</h3>
+        <div className="ml-4 ">{highestProdSource}</div>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1 text-sm">
         <h3 className="font-medium ">Total production</h3>
         <ul className="ml-4 space-y-1">
           {Object.entries(totalProduction).map(([source, watts]) => (

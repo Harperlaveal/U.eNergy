@@ -15,7 +15,6 @@ export default function LineGraphBackground({
   selectedYear,
 }: LineGraphBackgroundProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [hoveredYear, setHoveredYear] = useState<number | null>(null);
 
   useEffect(() => {
     const totalProdPerYear = data.map((yearData) => ({
@@ -25,17 +24,6 @@ export default function LineGraphBackground({
         0
       ),
     }));
-
-    const handleMouseOver = (
-      event: React.MouseEvent<SVGCircleElement>,
-      d: any
-    ) => {
-      setHoveredYear(d.year);
-    };
-
-    const handleMouseOut = () => {
-      setHoveredYear(null);
-    };
 
     const svg = select(svgRef.current);
     const svgWidth = svg.node()!.getBoundingClientRect().width;
@@ -76,12 +64,10 @@ export default function LineGraphBackground({
       .attr("cy", (d) => yScale(d.totalProduction))
       .attr("r", 5)
       .attr("opacity", (d) =>
-        hoveredYear === d.year || selectedYear === d.year ? 1 : 0.5
+        selectedYear === d.year || selectedYear === d.year ? 1 : 0.5
       )
       .attr("fill", "lightBlue")
-      .style("cursor", "pointer")
-      .on("mouseover", handleMouseOver)
-      .on("mouseout", handleMouseOut);
+      
     svg
       .append("text")
       .attr("class", "label")
@@ -92,11 +78,11 @@ export default function LineGraphBackground({
       .style("font-size", "10px");
 
     svg.exit().remove();
-  }, [data, selectedYear, hoveredYear]);
+  }, [data, selectedYear]);
 
   return (
-    <div className="w-full h-50 mb-0">
-      <svg ref={svgRef} className="w-full mb-[-150px] overflow-visible"></svg>
+    <div className="w-full h-0 mb-0">
+      <svg ref={svgRef} className="w-full overflow-visible"></svg>
     </div>
   );
 }

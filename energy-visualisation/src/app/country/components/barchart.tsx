@@ -26,6 +26,21 @@ export default function BarChart({ data, max }: BarChartProps) {
   const tooltipBackgroundColor = isDarkMode ? "black" : "white";
   const [activeItem, setActiveItem] = useState<string | null>(null);
 
+  // get total production for the year
+  const totalProduction = data
+    ? data.production.reduce(
+        (sum, curr) => sum + parseInt(curr.watts.toString()),
+        0
+      )
+    : 0;
+
+  const typeBreakdown = data
+    ? data.production.map((item) => ({
+        source: item.source,
+        production: item.watts,
+      }))
+    : [];
+
   const colorScale = scaleOrdinal<string>()
     .domain(energySources)
     .range([
@@ -120,10 +135,13 @@ export default function BarChart({ data, max }: BarChartProps) {
             .style("top", `${event.pageY - 10}px`)
             .style("left", `${event.pageX + 10}px`)
             .style("visibility", "visible")
+            // if its less than 1TWh, don't truncate
             .html(
-              `Method: ${d}<br>Amount: ${Math.trunc(
-                correspondingData.watts
-              )}TWh`
+              `Method: ${correspondingData.source}<br>Amount: ${
+                correspondingData.watts >= 1
+                  ? Math.trunc(correspondingData.watts)
+                  : correspondingData.watts
+              }TWh`
             );
         }
       })
@@ -157,7 +175,12 @@ export default function BarChart({ data, max }: BarChartProps) {
           .style("top", `${event.pageY - 10}px`)
           .style("left", `${event.pageX + 10}px`)
           .style("visibility", "visible")
-          .html(`Method: ${d.source}<br>Amount: ${Math.trunc(d.watts)}TWh`);
+          // if its less than 1TWh, don't truncate
+          .html(
+            `Method: ${d.source}<br>Amount: ${
+              d.watts >= 1 ? Math.trunc(d.watts) : d.watts
+            }TWh`
+          );
       })
       .on("mouseout", function () {
         tooltip.style("visibility", "hidden");
@@ -187,7 +210,7 @@ export default function BarChart({ data, max }: BarChartProps) {
   const LegendItem = ({ color, label, isActive }: LegendItemProps) => (
     <div className="flex  justify-start">
       <div
-        className={`w-4 h-4 rounded-full mr-4  hover:opacity-100 ${
+        className={`w-4 h-4 rounded-full mr-4 ${
           isActive ? "opacity-100" : "opacity-50"
         }`}
         style={{ backgroundColor: color }}
@@ -213,17 +236,35 @@ export default function BarChart({ data, max }: BarChartProps) {
           <h1 className="text-lg ">Amount Produced (Terrawatt Hours)</h1>
         </div>
       </div>
-      <div className="overflow-visible no-wrap relative right-[-75px] flex flex-col items-center space-y-2">
-        <h3 className="text-xs">Most to least renewable</h3>
-        <div className="space-y-2">
-          {energySources.map((source, index) => (
-            <LegendItem
-              key={index}
-              color={colorScale(source) as string}
-              label={source}
-              isActive={source === activeItem}
-            />
-          ))}
+      <div className="overflow-visible no-wrap relative right-[-75px] flex flex-col items-center space-y-6 text-xs">
+        <div className="space-y-2 shadow-lg p-2 rounded-lg">
+          <h3 className="font-reguar">Most to least renewable</h3>
+          <div className="space-y-2 font-light">
+            {energySources.map((source, index) => (
+              <LegendItem
+                key={index}
+                color={colorScale(source) as string}
+                label={source}
+                isActive={source === activeItem}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="shadow-lg p-2 rounded-lg">
+          <div>
+            <h3 className="font-medium">Yearly Total</h3>
+            <div>{parseInt(totalProduction.toString())} TWh</div>
+          </div>
+          <div className="mt-2">
+            <h3 className="font-medium">Yearly Breakdown</h3>
+            <div className="font-light">
+              {typeBreakdown.map((item, index) => (
+                <div key={index}>
+                  {item.source}: {parseInt(item.production.toString())} TWh
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
