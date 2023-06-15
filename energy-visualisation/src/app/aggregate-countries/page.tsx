@@ -43,15 +43,21 @@ const SimilarCountriesPage = () => {
   .range([0, countryCount * 50])
   .padding(0.2);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const svg = d3.select(ref.current);
+useEffect(() => {
+  if (!ref.current) return;
+  const svg = d3.select(ref.current);
 
-    const yAxis = d3.axisLeft(yScale);
-    svg.append('g')
-      .attr('transform', 'translate(60, 20)')
-      .call(yAxis);
-  }, [ref, yScale]);
+  // remove the old y-axis if it exists
+  svg.select('.y-axis').remove();
+
+  // create the y-axis
+  const yAxis = d3.axisLeft(yScale);
+  svg.append('g')
+    .attr('class', 'y-axis') // add a class to the y-axis for selecting it later
+    .attr('transform', 'translate(60, 20)')
+    .call(yAxis);
+}, [ref, yScale, year]);
+
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
