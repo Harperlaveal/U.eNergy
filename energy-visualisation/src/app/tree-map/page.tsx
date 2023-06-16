@@ -23,6 +23,14 @@ const methods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewable
 // const continents: string[] = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"];
 const continents: string[] = ["Asia", "Europe", "North America", "Oceania", "South America"];
 
+const continentToColorMap: Map<string, string> = new Map([
+  ["Asia", "#FEF502"], // yellow
+  ["Europe", "#F4BF3A"], // orange
+  ["North America", "#D1F1F9"], // light blue
+  ["Oceania", "#79E381"], // green
+  ["South America", "#DE2A2A"], // red
+]);
+
 interface CountryNode {
   name: string;
   value: number;
@@ -31,9 +39,14 @@ interface CountryNode {
 
 const allNodes: Map<string, Map<string, CountryNode[]>> = new Map();
 
+
+
 export const TreeMap = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [year, setYear] = useState<number>(2022);
+  // a number state called depth
+  const [depth, setDepth] = useState<number>(0);
+
 
   useEffect(() => {
     d3.csv("data/data.csv").then((data) => {
@@ -93,8 +106,8 @@ export const TreeMap = () => {
       console.log(hierarchyData);
 
 
-      var width = 960;
-      var height = 600;
+      var width = 1300;
+      var height = 800;
 
       const treemap = d3
         .treemap()
@@ -147,6 +160,10 @@ export const TreeMap = () => {
       console.log(customData);
 
       /* Copy Stu code starts */
+
+      // delete the old tree map if it exists
+      d3.select("#treemap").select("*").remove();
+
       var svg = d3.select("#treemap").
         append("svg").
         attr("width", width).
@@ -158,6 +175,7 @@ export const TreeMap = () => {
       }
 
       var isParentView = true;
+      
 
       var root = d3.hierarchy(hierarchyData).sum(sumByValue);
       // @ts-ignore
@@ -166,7 +184,8 @@ export const TreeMap = () => {
 
       /**
        * This function just goes back and forth between root node and layer 1 nodes
-       * We can probably figure something out to make it go deeper
+       * We can probably figure something out to make it go deeper.
+       * We don't know which cell you clicked in so we can't tell which node to traverse down to.
        */
       function switchView() {
         svg.selectAll(".node").remove();
@@ -191,12 +210,16 @@ export const TreeMap = () => {
         .attr("width", function(d) { return d.x1 - d.x0; })
         // @ts-ignore
         .attr("height", function(d) { return d.y1 - d.y0; })
+        .attr("border", "1px solid black")
         // @ts-ignore
         .attr("fill", function(d) {
           if (!isParentView){
             console.log("d in update function: ");
             console.log(d);
-            var color = getRandomColor();  
+            // @ts-ignore
+            var continent = String(d.parent.data.name);
+            var color = String(continentToColorMap.get(continent));
+            // var color = getRandomColor();  
           } else {
             // @ts-ignore
             var type = d.data.name;
