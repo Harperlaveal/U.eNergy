@@ -13,7 +13,7 @@ const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other
 
 
 
-const SimilarCountriesPage = () => {
+const AggregateCountriesPage = () => {
   const [countryData, setCountryData] = useState<{
     [country: string]: EnergyProductionData[];
   }>({});
@@ -25,6 +25,7 @@ const SimilarCountriesPage = () => {
 
   const handleYearChange = (year: number) => {
       setSelectedYear(year);
+      // setCountryRange([1, 10]);
     };
 
   const handleCountryRangeChange = (range: [number, number]) => {
@@ -67,4 +68,4 @@ const SimilarCountriesPage = () => {
   );
 };
 
-export default SimilarCountriesPage;
+export default AggregateCountriesPage;

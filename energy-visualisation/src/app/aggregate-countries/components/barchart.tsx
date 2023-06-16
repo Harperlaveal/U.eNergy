@@ -44,41 +44,67 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
     .range([0, (countryRange[1] - countryRange[0]) * 50])
     .padding(0.2);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const svg = d3.select(ref.current);
-
-    svg.select('.y-axis').remove();
-    svg.select('.x-axis').remove();
-
-    const yAxis = d3.axisLeft(yScale);
-    const xAxis = d3.axisBottom(xScale).tickSize(5);
-
-    svg.append('g')
-      .attr('class', 'y-axis')
-      .attr('transform', 'translate(60, 20)')
-      .call(yAxis);
-
-    svg.append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(60, ${yScale(0) + 20})`)
-      .call(xAxis)
-      .selectAll('text')
-      .style('font-size', '5px');
-
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 10])
-      .on('zoom', (event) => {
-        const newYScale = event.transform.rescaleY(yScale);
-        svg.select<SVGGElement>('.y-axis').call(yAxis.scale(newYScale));
-        svg.selectAll<SVGRectElement, { amount: number; id: string }>('rect')
-          .attr('y', (d) => newYScale(d.amount))
-          .attr('height', (d) => 160 - newYScale(d.amount));
-      });
-
-    svg.call(zoom);
-  }, [ref, yScale, totals]);
-
+    useEffect(() => {
+      if (!ref.current) return;
+      const svg = d3.select(ref.current);
+    
+      svg.select('.y-axis').remove();
+      svg.select('.x-axis').remove();
+    
+      const yAxis = d3.axisLeft(yScale);
+      const xAxis = d3.axisBottom(xScale);
+    
+      svg.append('g')
+        .attr('class', 'y-axis')
+        .attr('transform', 'translate(60, 20)')
+        .call(yAxis);
+    
+        svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(60, ${yScale(0) + 20})`)
+        .call(xAxis)
+        .selectAll("text")
+        .attr("transform", "rotate(-45)") // adjust the angle as needed
+        .style("text-anchor", "end");
+    
+    
+      // Get the parent group of the bar chart
+      const g = svg.select("g");
+    
+      // Select all current bars within the parent group
+      const bars = g.selectAll('.bar')
+        .data(totals, (total) => total.id);
+    
+      bars.enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', (total) => xScale(total.id)!)
+        .attr('y', yScale(0))
+        .attr('width', xScale.bandwidth())
+        .attr('height', 0)
+        .attr('fill', (total) => colourMap[total.id])
+        .on('click', setSelectedCountry)
+        .transition()
+        .duration(750)
+        .attr('y', (total) => yScale(total.amount))
+        .attr('height', (total) => 160 - yScale(total.amount));
+    
+      bars
+        .transition()
+        .duration(750)
+        .attr('x', (total) => xScale(total.id)!)
+        .attr('y', (total) => yScale(total.amount))
+        .attr('width', xScale.bandwidth())
+        .attr('height', (total) => 160 - yScale(total.amount));
+    
+      bars.exit()
+        .transition()
+        .duration(750)
+        .attr('y', yScale(0))
+        .attr('height', 0)
+        .remove();
+    }, [ref, yScale, xScale, totals, setSelectedCountry, colourMap]);
+    
   return (
     <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
       <g transform="translate(60, 20)">
@@ -88,20 +114,6 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         {/* Axis labels */}
         <text x="-50" y="180" fontSize="12">{year}</text>
         <text x="-10" y="-10" fontSize="12">Total Watts Produced (TWh)</text>
-
-        {/* Bar chart */}
-        {totals.map((total, index) => (
-          <g key={total.id} transform={`translate(${index * 50}, 0)`}>
-            <rect
-              x="0"
-              y={yScale(total.amount)}
-              width={xScale.bandwidth()}
-              height={160 - yScale(total.amount)}
-              fill={colourMap[total.id]}
-              onClick={() => setSelectedCountry(total)}
-            />
-          </g>
-        ))}
       </g>
     </svg>
   );
