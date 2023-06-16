@@ -82,7 +82,7 @@ const NavItemList: NavItem[] = [
   },
   {
     title: "Production Hierarchy",
-    href: "",
+    href: "/tree-map",
     icon: <ViewQuiltIcon />,
   },
 ];

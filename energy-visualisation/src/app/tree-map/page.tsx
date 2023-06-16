@@ -210,7 +210,7 @@ export const TreeMap = () => {
         .attr("width", function(d) { return d.x1 - d.x0; })
         // @ts-ignore
         .attr("height", function(d) { return d.y1 - d.y0; })
-        .attr("border", "1px solid black")
+        .style("stroke", "1px solid black")
         // @ts-ignore
         .attr("fill", function(d) {
           if (!isParentView){
