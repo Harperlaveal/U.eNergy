@@ -639,7 +639,13 @@ export const SimilarCountriesPage = () => {
                       className={`year-list-year p-4 font-medium rounded opacity-90 hover:opacity-100 cursor-pointer hover:underline  ${
                         y === year ? " text-blue-500 underline " : " "
                       } `}
-                      onClick={() => setYear(y)}
+                      onClick={() => {
+                        setYear(y);
+                        // remove selected country,
+                        // since the year has changed,
+                        // the popup will not show correct info
+                        setSelectedCountry(null as any);
+                      }}
                     >
                       {y}
                     </div>
