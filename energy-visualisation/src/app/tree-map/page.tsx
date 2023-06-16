@@ -90,37 +90,24 @@ export const TreeMap = () => {
       const hierarchyData = convertMapToGraph(allNodes); 
 
       console.log("hierachy data: ");
-      console.log(hierarchyData); // the hierarchy data structure is OK
+      console.log(hierarchyData);
+
 
       var width = 960;
       var height = 600;
 
-      /*
       const treemap = d3
-        .treemap<CountryNode>() // Or maybe something is going wrong here?
+        .treemap()
         .size([width, height])
         .padding(1)
         .round(true)
-        .tile(d3.treemapSliceDice);
-      */
+        //.tile(d3.treemapSliceDice);
+        //.tile(d3.treemapBinary);
+        .tile(d3.treemapSquarify); // we like this one :)
+        //.tile(d3.treemapResquarify);
+        //.tile(d3.treemapSlice);
+        //.tile(d3.treemapDice);
 
-      /*
-       * The NaNs are coming from here somewhere?
-       */  
-      const treemap = d3
-        .treemap() // Or maybe something is going wrong here?
-        .size([width, height])
-        .padding(1)
-        .round(true)
-        .tile(d3.treemapSliceDice);
-      
-
-      // const root = d3.hierarchy<CountryNode>(hierarchyData); // Something is going wrong here?
-
-      /*
-       * The NaNs are coming from here somewhere?
-       */  
-      // const root = d3.hierarchy(hierarchyData); // Something is going wrong here?
 
       const customData = {
         name: "root",
@@ -172,11 +159,15 @@ export const TreeMap = () => {
 
       var isParentView = true;
 
-      var root = d3.hierarchy(customData).sum(sumByValue);
+      var root = d3.hierarchy(hierarchyData).sum(sumByValue);
       // @ts-ignore
       treemap(root);
       update(root.children);
 
+      /**
+       * This function just goes back and forth between root node and layer 1 nodes
+       * We can probably figure something out to make it go deeper
+       */
       function switchView() {
         svg.selectAll(".node").remove();
         isParentView ? update(root.children) : update(root.leaves());
@@ -230,81 +221,6 @@ export const TreeMap = () => {
       }
 
       /* Copy stu code ends */
-
-      // const root = d3.hierarchy(customData); // Something is going wrong here?
-
-      console.log("root before tree map");
-      console.log(root);
-      // @ts-ignore
-      treemap(root);
-      console.log("root after treemap");
-      console.log(root);
-
-      // const svg = d3.select(svgRef.current); // temp
-
-      console.log("root leaves");
-      console.log(root.leaves());
-
-      /*
-      svg.selectAll('rect')
-        .data(root.leaves() as d3.HierarchyRectangularNode<CountryNode>[])
-        .enter()
-        .append('rect')
-        .attr('x', (d) => {
-          // console.log(d);
-          return d.x0;
-          // return 1;
-        })
-        .attr('y', (d) => d.y0)
-        .attr('width', (d) => {
-          return d.x1 - d.x0
-          //return 1;
-        })
-        .attr('height', (d) => {
-          return d.y1 - d.y0
-          //return 1;
-        })
-        .attr('stroke', 'black')
-        .style('fill', (d) => {
-          const method = d.parent?.parent?.data.name || '';
-          return productionColorMap.get(method) || '';
-        });
-        */
-        /*
-        svg.selectAll('rect')
-        .data(root.leaves())
-        .enter()
-        .append('rect')
-        .attr('x', (d) => {
-          // console.log(d);
-          var temp = d as any;
-          return temp.x0;
-          // return d.x0;
-          // return 1;
-        })
-        .attr('y', (d) => {
-          var temp = d as any;
-          return temp.y0;
-          // return d.y0;
-        })
-        .attr('width', (d) => {
-          var temp = d as any;
-          return temp.x1 - temp.x0;
-          // return d.x1 - d.x0;
-          //return 1;
-        })
-        .attr('height', (d) => {
-          var temp = d as any;
-          return temp.y1 - temp.y0;
-          // return d.y1 - d.y0
-          //return 1;
-        })
-        .attr('stroke', 'black')
-        .style('fill', (d) => {
-          const method = d.parent?.parent?.data.name || '';
-          return productionColorMap.get(method) || '';
-        });
-        */
     });
   }, [year]);
 
@@ -326,59 +242,46 @@ function getRandomColor() {
  * @param allNodes 
  * @returns 
  */
-function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): CountryNode {
+function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): any {
   // Create the node for each production method
-  var methodsList: CountryNode[] = [];
-  var methodTotal: number = 0;
-  var rootNodeTotal: number = 0;
+  var methodsList: any[] = [];
 
   methods.forEach((method) => {
     
-    var methodTotal: number = 0;
-    var continentList: CountryNode[] = [];
+    var continentList: any[] = [];
     
       // Add countries to the continent nodes
       continents.forEach((continent) => {  
-        var continentEnergy: number = 0;
-        const countries: CountryNode[] = allNodes.get(method)?.get(continent) as CountryNode[];
+        // @ts-ignore
+        const countries: any[] = allNodes.get(method)?.get(continent)?.map((country) => {
+          return {
+            name: country.name,
+            value: country.value,
+          };
+        });
+
         // log an error if countries is undefined and continue
         if (countries === undefined || countries === null) {
           console.log("Error: countries is undefined");
           return;
         }
-        // calculate contientn energy
-        countries.forEach((country) => {
-          continentEnergy += country.value;
-        });
         // make the contient node
-        const continentNode: CountryNode = {
+        const continentNode = {
           name: continent,
-          value: continentEnergy,
           children: countries,
         };
         // add the continent node to the continent list
         continentList.push(continentNode);
-        // add to the continent total
-        methodTotal += continentNode.value;
       });
-      const methodNode: CountryNode = {
+      const methodNode = {
         name: method,
-        value: methodTotal,
         children: continentList,
       };
       methodsList.push(methodNode);
-      // add to the method total
-      methodTotal += methodNode.value;
     });
     // make the root node
-    // calculate root node energy
-    methodsList.forEach((method) => {
-      rootNodeTotal += method.value;
-    });
-
-    const rootNode: CountryNode = {
+    const rootNode = {
       name: "All",
-      value: rootNodeTotal,
       children: methodsList,
     };
     return rootNode;
