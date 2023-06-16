@@ -17,6 +17,8 @@ const productionColorMap: Map<string, string> = new Map([
   ["Oil", "#6A4848"],
 ]);
 
+const allProductionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
+
 const methods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
 // const continents: string[] = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"];
 const continents: string[] = ["Asia", "Europe", "North America", "Oceania", "South America"];
@@ -118,7 +120,118 @@ export const TreeMap = () => {
       /*
        * The NaNs are coming from here somewhere?
        */  
-      const root = d3.hierarchy(hierarchyData); // Something is going wrong here?
+      // const root = d3.hierarchy(hierarchyData); // Something is going wrong here?
+
+      const customData = {
+        name: "root",
+        children: [
+          {
+            name: "Hydro",
+            children: [
+              { name: "Asia", children: [
+                { name: "China", value: 1 },
+                { name: "India", value: 1 }
+              ] },
+              { name: "Europe", children: [
+                { name: "Germany", value: 1 },
+                { name: "France", value: 1 },
+                { name: "Italy", value: 1 },
+                { name: "Spain", value: 1 },
+                { name: "United Kingdom", value: 1 },
+              ] },
+              { name: "North America", value: 1 },
+              { name: "Oceania", value: 1 },
+              { name: "South America", value: 1 },
+            ],
+          },
+          {
+            name: "Nuclear",
+            children: [
+              { name: "Asia", value: 1 },
+              { name: "Europe", value: 1 },
+              { name: "North America", value: 1 },
+              { name: "Oceania", value: 1 },
+              { name: "South America", value: 1 },
+            ],
+          },
+        ]
+      };
+      console.log("customData");
+      console.log(customData);
+
+      /* Copy Stu code starts */
+      var svg = d3.select("#treemap").
+        append("svg").
+        attr("width", width).
+        attr("height", height).
+        on("click", switchView);
+
+      function sumByValue(d: any) {
+        return d.value;
+      }
+
+      var isParentView = true;
+
+      var root = d3.hierarchy(customData).sum(sumByValue);
+      // @ts-ignore
+      treemap(root);
+      update(root.children);
+
+      function switchView() {
+        svg.selectAll(".node").remove();
+        isParentView ? update(root.children) : update(root.leaves());
+        isParentView = !isParentView;
+      }
+
+      function update(node: any) {
+
+        console.log("root in update function: ");
+        console.log(node);
+
+        var cell = svg.selectAll(".node")
+          .data(node)
+          .enter().append("g")
+          .attr("class", "node")
+          .attr("transform", function (d: any) { return "translate(" + d.x0 + "," + d.y0 + ")"; });
+        cell.append("rect")
+        // @ts-ignore
+        .attr("id", function(d) { return d.data.name; })
+        // @ts-ignore
+        .attr("width", function(d) { return d.x1 - d.x0; })
+        // @ts-ignore
+        .attr("height", function(d) { return d.y1 - d.y0; })
+        // @ts-ignore
+        .attr("fill", function(d) {
+          if (!isParentView){
+            console.log("d in update function: ");
+            console.log(d);
+            var color = getRandomColor();  
+          } else {
+            // @ts-ignore
+            var type = d.data.name;
+            var color = String(productionColorMap.get(type));
+            return color;
+          }
+          
+          return color;
+        });
+
+        cell.append("text")
+          // @ts-ignore
+          .attr("clip-path", function(d) { return "url(#clip-" + d.data.name + ")"; })
+          .selectAll("tspan")
+          // @ts-ignore
+          .data(function(d) { return [d.data.name]; }) // Use the name directly, no split
+          .enter().append("tspan")
+          .attr("font-size", d => isParentView ? "16px" : "10px")
+          .attr("x", 4)
+          .attr("y", 20) // Fixed position for the name
+          .text(function(d) { return d; });
+      }
+
+      /* Copy stu code ends */
+
+      // const root = d3.hierarchy(customData); // Something is going wrong here?
 
       console.log("root before tree map");
       console.log(root);
@@ -127,7 +240,7 @@ export const TreeMap = () => {
       console.log("root after treemap");
       console.log(root);
 
-      const svg = d3.select(svgRef.current);
+      // const svg = d3.select(svgRef.current); // temp
 
       console.log("root leaves");
       console.log(root.leaves());
@@ -157,7 +270,7 @@ export const TreeMap = () => {
           return productionColorMap.get(method) || '';
         });
         */
-
+        /*
         svg.selectAll('rect')
         .data(root.leaves())
         .enter()
@@ -191,11 +304,21 @@ export const TreeMap = () => {
           const method = d.parent?.parent?.data.name || '';
           return productionColorMap.get(method) || '';
         });
+        */
     });
   }, [year]);
 
 //Write a function to convert the map to a hierarchy data structure that d3 can use
 // Create the node for each continent
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++){
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 // Create the root node
 /**
@@ -307,10 +430,24 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): C
   var height = 600;
 
   return (
+    <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
+      <div className="flex flex-col w-[90%] items-center h-full">
+        <h1 className="text-4xl font-bold z-10">Hierachy Page</h1>
+        <div className="flex flex-col">
+          <div id="treemap"></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /*
+     return (
     <div>
       <svg ref={svgRef} width={width} height={height} className="shadow-lg" />
     </div>
   );
+  */
+
 };
 
 export default TreeMap;
