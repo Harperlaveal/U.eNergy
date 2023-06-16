@@ -72,7 +72,7 @@ const NavItemList: NavItem[] = [
   },
   {
     title: "Global Trends",
-    href: "",
+    href: "/aggregate-countries",
     icon: <EarthIcon />,
   },
   {

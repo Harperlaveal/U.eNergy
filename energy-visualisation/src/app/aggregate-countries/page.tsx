@@ -7,7 +7,7 @@ import Timeline from './components/timeline';
 import { EnergyProductionData } from '../country/interfaces';
 import { loadCSVData } from '../country/utils';
 import { createCountryData } from '../country/utils';
-import CountryScale from './components/country-scale';
+import CountryRange from './components/country-range';
 
 const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
 
@@ -17,7 +17,7 @@ const SimilarCountriesPage = () => {
   const [countryData, setCountryData] = useState<{
     [country: string]: EnergyProductionData[];
   }>({});
-  const [countryCount, setCountryCount] = useState<number>(10);
+  const [countryRange, setCountryRange] = useState<[number, number]>([1, 10]);
   const [years, setYears] = useState<number[]>([2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2020, 2021, 2022]);
   const [selectedYear, setSelectedYear] = useState<number>(2020);
   const [countryList, setCountryList] = useState<string[]>([]);
@@ -27,8 +27,8 @@ const SimilarCountriesPage = () => {
       setSelectedYear(year);
     };
 
-  const handleCountryCountChange = (count: number) => {
-      setCountryCount(count);
+  const handleCountryRangeChange = (range: [number, number]) => {
+    setCountryRange(range);
   };
 
     useEffect(() => {
@@ -51,10 +51,10 @@ const SimilarCountriesPage = () => {
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <div className="flex-grow flex flex-col justify-center items-center">
-    <CountryScale countryCount={countryList.length} onCountryCountChange={handleCountryCountChange} />
+    <CountryRange countryCount={countryList.length} onCountryRangeChange={handleCountryRangeChange} />
     <BarChart
       countryData={countryData}
-      countryCount={countryCount}
+      countryRange={countryRange}
       year={selectedYear}
       setSelectedCountry={() => { }}
     />

@@ -27,8 +27,10 @@
     "iso-3166-1-alpha-2": "^1.0.1",
     "next": "13.4.4",
     "postcss": "8.4.24",
+    "rc-slider": "^10.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-range-slider-input": "^3.0.7",
     "tailwindcss": "3.3.2",
     "typescript": "5.1.3"
   },
