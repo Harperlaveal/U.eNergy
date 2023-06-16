@@ -8,11 +8,21 @@ import LineGraph from "./line-graph";
 interface TimelineProps {
   data: EnergyProductionData[];
   onYearChange: (year: number) => void;
+  initYear: number;
 }
 
-export default function Timeline({ data, onYearChange }: TimelineProps) {
-  const [value, setValue] = useState<number>(data[data.length - 1].year);
-  const [index, setIndex] = useState<number>(data.length - 1);
+export default function Timeline({
+  data,
+  onYearChange,
+  initYear,
+}: TimelineProps) {
+  const [value, setValue] = useState<number>(initYear as number);
+  // get index of initYear
+  const initialIndex = data.findIndex((d) => d.year == initYear);
+  const [index, setIndex] = useState<number>(
+    // set year to last year if init year not found
+    initialIndex != -1 ? initialIndex : data.length - 1
+  );
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -67,7 +77,7 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
 
   useEffect(() => {
     onYearChange(data[index].year);
-    setValue(data[index].year);
+    setValue(data[index].year as number);
   }, [index, onYearChange]);
 
   return (
@@ -99,9 +109,7 @@ export default function Timeline({ data, onYearChange }: TimelineProps) {
       <div className="flex justify-between text-xs w-full">
         {data.map((d, i) => (
           <button
-            className={`hover: ${
-              d.year === value ? "text-blue-500" : ""
-            }`}
+            className={`hover: ${d.year === value ? "text-blue-500" : ""}`}
             onClick={() => {
               setIndex(i);
               setValue(d.year);

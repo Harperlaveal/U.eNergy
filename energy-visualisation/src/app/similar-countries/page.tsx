@@ -608,7 +608,10 @@ export const SimilarCountriesPage = () => {
             >
               <div>
                 <div className="flex space-x-2">
-                  <a target="_blank" href={`/country/${selectedCountry.id}`} >
+                  <a
+                    target="_blank"
+                    href={`/country/${selectedCountry.id}?initYear=${year}`}
+                  >
                     <h1 className="font-bold text-lg hover:underline">
                       {selectedCountry.id}
                     </h1>

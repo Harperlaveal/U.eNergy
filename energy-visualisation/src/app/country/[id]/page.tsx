@@ -5,9 +5,11 @@ import CountrySelector from "../components/country-selector";
 import { Card, CardContent } from "@mui/material";
 import CountryStats from "../components/country-stats";
 import FlagCard from "../components/flag-card";
+import { useSearchParams } from "next/navigation";
 
 export default function CountryPage({ params }: { params: { id: string } }) {
   const id = params.id;
+  const initYear = useSearchParams().get("initYear") || 0;
 
   const countryName = capitalizeFirstLetter(decodeURI(id));
 
@@ -16,7 +18,10 @@ export default function CountryPage({ params }: { params: { id: string } }) {
       <CountryDataProvider>
         <div className="flex flex-row space-x-2">
           <div className="pb-16 px-24 pt-8 shadow-xl min-w-[80%] h-[700px] justify-center items-center rounded-xl border">
-            <CountryViewer countryName={countryName} />
+            <CountryViewer
+              countryName={countryName}
+              initYear={parseInt(initYear.toString())}
+            />
           </div>
           <div className="flex flex-col flex-grow space-y-2 ">
             <CountrySelector id={id} />

@@ -4,18 +4,24 @@ import Timeline from "./timeline";
 import { EnergyProductionData } from "../interfaces";
 import { CountryDataContext } from "../contexts/country-data-context";
 import CountryLoader from "./country-loader/country-loader";
-import { Card, CardContent, TextField } from "@mui/material";
 
 interface CountryViewerProps {
   countryName: string;
+  initYear: number;
 }
 
-export default function CountryViewer({ countryName }: CountryViewerProps) {
+export default function CountryViewer({
+  countryName,
+  initYear,
+}: CountryViewerProps) {
   const { countryData } = useContext(CountryDataContext);
 
   const [selectedYear, setSelectedYear] = useState<number>(0);
 
   useEffect(() => {
+    if (initYear !== 0) {
+      setSelectedYear(initYear);
+    }
     if (countryData[countryName]?.length > 0) {
       setSelectedYear(
         countryData[countryName]?.[countryData[countryName]?.length - 1]?.year
@@ -67,6 +73,7 @@ export default function CountryViewer({ countryName }: CountryViewerProps) {
       <Timeline
         data={countryData[countryName]}
         onYearChange={handleYearChange}
+        initYear={initYear}
       />
     </div>
   );
