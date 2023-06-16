@@ -18,6 +18,7 @@ import React, { use, useEffect, useState } from "react";
 import * as d3 from "d3";
 import Link from "next/link";
 import { Tooltip } from "@mui/material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 /**
  * An array of strings that represent the different energy production methods
@@ -607,11 +608,14 @@ export const SimilarCountriesPage = () => {
               className="fixed left-72 shadow-md p-4 rounded"
             >
               <div>
-                <Link href={`/country/${selectedCountry.id}`}>
-                  <h1 className="font-bold text-lg hover:underline">
-                    {selectedCountry.id}
-                  </h1>
-                </Link>
+                <div className="flex space-x-2">
+                  <Link href={`/country/${selectedCountry.id}`}>
+                    <h1 className="font-bold text-lg hover:underline">
+                      {selectedCountry.id}
+                    </h1>
+                  </Link>
+                  <span className="text-xl font-bold">⤴</span>
+                </div>
                 <ul>
                   <li>Biggest Producer: {selectedCountry.largestMethod}</li>
                   <li>
@@ -682,8 +686,9 @@ export const SimilarCountriesPage = () => {
             <div className="color-map-entry border border-black cursor-pointer">
               <div className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100">
                 <div className="flex flex-row space-x-2">
-                  <p className="font-bold">
-                    Similarity: {similarityThreshold.toFixed(2)}
+                  <p className="font-bold flex items-center space-x-2">
+                    <HelpOutlineIcon />
+                    <span>Similarity: {similarityThreshold.toFixed(2)}</span>
                   </p>
                 </div>
               </div>
