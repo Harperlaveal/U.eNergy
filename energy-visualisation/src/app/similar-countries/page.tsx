@@ -16,7 +16,6 @@
 // import the react library
 import React, { use, useEffect, useState } from "react";
 import * as d3 from "d3";
-import Link from "next/link";
 import { Tooltip } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
@@ -609,11 +608,11 @@ export const SimilarCountriesPage = () => {
             >
               <div>
                 <div className="flex space-x-2">
-                  <Link href={`/country/${selectedCountry.id}`}>
+                  <a target="_blank" href={`/country/${selectedCountry.id}`} >
                     <h1 className="font-bold text-lg hover:underline">
                       {selectedCountry.id}
                     </h1>
-                  </Link>
+                  </a>
                   <span className="text-xl font-bold">⤴</span>
                 </div>
                 <ul>
