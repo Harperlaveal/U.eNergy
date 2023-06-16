@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { EnergyProductionData } from "../../country/interfaces";
 import Slider from "@mui/material/Slider";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -7,9 +6,11 @@ import PauseIcon from "@mui/icons-material/Pause";
 interface TimelineProps {
   years: number[];
   onYearChange: (year: number) => void;
+  rangeChanged: boolean; // new prop
+  setRangeChanged: (changed: boolean) => void; // new prop
 }
 
-export default function Timeline({ years, onYearChange }: TimelineProps) {
+export default function Timeline({ years, onYearChange, rangeChanged, setRangeChanged }: TimelineProps) {
   const [value, setValue] = useState<number>(years[years.length - 1]);
   const [index, setIndex] = useState<number>(years.length - 1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -47,31 +48,48 @@ export default function Timeline({ years, onYearChange }: TimelineProps) {
   };
 
   const handlePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      intervalRef.current = setInterval(() => {
-        setIndex((prevIndex) => {
-          const nextIndex = prevIndex >= years.length - 1 ? 0 : prevIndex + 1;
-          return nextIndex;
-        });
-      }, 1000);
-    } else {
+    if (rangeChanged) {
+      setRangeChanged(false); // Reset the flag to false after handling it
+      setIsPlaying(false);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+    } else {
+      setIsPlaying(!isPlaying);
+      if (!isPlaying) {
+        intervalRef.current = setInterval(() => {
+          setIndex((prevIndex) => {
+            const nextIndex = prevIndex >= years.length - 1 ? 0 : prevIndex + 1;
+            return nextIndex;
+          });
+        }, 1000);
+      } else {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
       }
     }
   };
 
-  const totalYears = years[years.length - 1] - years[0];
+  useEffect(() => {
+    if (rangeChanged) {
+      setRangeChanged(false); // Reset the flag to false after handling it
+      setIsPlaying(false);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+  }, [rangeChanged, setRangeChanged]); // add rangeChanged to the dependency array
 
   useEffect(() => {
     onYearChange(years[index]);
     setValue(years[index]);
   }, [index, onYearChange, years]);
 
- return (
+  const totalYears = years[years.length - 1] - years[0];
+
+  return (
     <div className="mt-8 w-full relative">
-      {/* <LineGraph data={years} selectedYear={value} /> */}
       <button onClick={handlePlay}>
         {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
       </button>
@@ -83,12 +101,6 @@ export default function Timeline({ years, onYearChange }: TimelineProps) {
         sx={{
           "& .MuiSlider-thumb": {
             transition: "left 0.3s ease-in-out",
-            "&:not(.MuiSlider-active)": {
-              transition: "left 0.3s ease-in-out",
-            },
-          },
-          "& .MuiSlider-track": {
-            transition: "width 0.3s ease-in-out",
             "&:not(.MuiSlider-active)": {
               transition: "width 0.3s ease-in-out",
             },

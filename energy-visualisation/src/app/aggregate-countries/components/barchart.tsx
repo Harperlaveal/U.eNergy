@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 import { EnergyProductionData, EnergySourceProduction } from '@/app/country/interfaces';
@@ -10,7 +12,7 @@ interface BarChartProps {
   };
   countryRange: [number, number];
   year: number;
-  setSelectedCountry: React.Dispatch<React.SetStateAction<{ country: string; amount: number; id: string; } | null>>;
+  setSelectedCountry: React.Dispatch<React.SetStateAction<{ id: string; amount: number; } | null>>;
 }
 
 const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, setSelectedCountry }) => {
@@ -75,7 +77,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
       const bars = g.selectAll('.bar')
         .data(totals, (total) => total.id);
     
-      bars.enter()
+        bars.enter()
         .append('rect')
         .attr('class', 'bar')
         .attr('x', (total) => xScale(total.id)!)
@@ -83,11 +85,15 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr('width', xScale.bandwidth())
         .attr('height', 0)
         .attr('fill', (total) => colourMap[total.id])
-        .on('click', setSelectedCountry)
+        .on('click', function(event, total) { 
+            event.stopPropagation();
+            setSelectedCountry(total);
+        }) 
         .transition()
         .duration(750)
         .attr('y', (total) => yScale(total.amount))
         .attr('height', (total) => 160 - yScale(total.amount));
+    
     
       bars
         .transition()

@@ -1,47 +1,29 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import * as d3 from 'd3';
 import BarChart from './components/barchart';
 import Timeline from './components/timeline';
-import { EnergyProductionData } from '../country/interfaces';
-import { loadCSVData } from '../country/utils';
-import { createCountryData } from '../country/utils';
 import CountryRange from './components/country-range';
-
-const productionMethods: string[] = ["Hydro", "Nuclear", "Solar", "Wind", "Other renewables", "Natural gas", "Coal", "Oil"];
-
-
+import CountryDialog from './components/country-dialog';
+import { loadCSVData, createCountryData } from '../country/utils';
+import { EnergyProductionData } from '../country/interfaces';
 
 const AggregateCountriesPage = () => {
-  const [countryData, setCountryData] = useState<{
-    [country: string]: EnergyProductionData[];
-  }>({});
+  const [countryData, setCountryData] = useState<{ [country: string]: EnergyProductionData[] }>({});
   const [countryRange, setCountryRange] = useState<[number, number]>([1, 10]);
   const [years, setYears] = useState<number[]>([2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2020, 2021, 2022]);
   const [selectedYear, setSelectedYear] = useState<number>(2020);
   const [countryList, setCountryList] = useState<string[]>([]);
+  const [selectedCountryData, setSelectedCountryData] = useState<{ id: string; amount: number; } | null>(null);
+  const [rangeChanged, setRangeChanged] = useState(false);
 
-
-  const handleYearChange = (year: number) => {
-      setSelectedYear(year);
-      // setCountryRange([1, 10]);
-    };
-
-  const handleCountryRangeChange = (range: [number, number]) => {
-    setCountryRange(range);
-  };
-
-    useEffect(() => {
+  useEffect(() => {
     loadCSVData("/data/data.csv")
       .then((data: any[]) => {
         const transformedData = createCountryData(data);
         setCountryData(transformedData);
 
-        // Extract unique country values from the CSV data
-        const uniqueCountries = Array.from(
-          new Set(data.map((row: { COUNTRY: any; }) => row.COUNTRY))
-        );
+        const uniqueCountries = Array.from(new Set(data.map((row: { COUNTRY: any; }) => row.COUNTRY)));
         setCountryList(uniqueCountries);
       })
       .catch((error: any) => {
@@ -49,18 +31,33 @@ const AggregateCountriesPage = () => {
       });
   }, []);
 
+  const handleYearChange = (year: number) => {
+      setSelectedYear(year);
+  };
+
+  const handleCountryRangeChange = (range: [number, number]) => {
+    setCountryRange(range);
+    setRangeChanged(true);
+  };
+
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <div className="flex-grow flex flex-col justify-center items-center">
-    <CountryRange countryCount={countryList.length} onCountryRangeChange={handleCountryRangeChange} />
-    <BarChart
-      countryData={countryData}
-      countryRange={countryRange}
-      year={selectedYear}
-      setSelectedCountry={() => { }}
-    />
-  </div>
+        <CountryRange countryCount={countryList.length} onCountryRangeChange={handleCountryRangeChange} />
+        <BarChart
+          countryData={countryData}
+          countryRange={countryRange}
+          year={selectedYear}
+          setSelectedCountry={setSelectedCountryData}
+        />
+        <CountryDialog 
+          open={selectedCountryData !== null} 
+          onClose={() => setSelectedCountryData(null)} 
+          countryData={selectedCountryData}
+        />
+      </div>
       <Timeline
+        key={countryRange.join('-')}  // Add this line to reset Timeline component when range changes
         years={years}
         onYearChange={handleYearChange}
       />

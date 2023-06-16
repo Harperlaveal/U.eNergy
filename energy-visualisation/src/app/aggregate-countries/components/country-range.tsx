@@ -1,15 +1,17 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 
 interface CountryRangeProps {
   countryCount: number;
-  onCountryRangeChange: (srange: [number, number]) => void;
+  onCountryRangeChange: (range: [number, number]) => void;
 }
 
 export default function CountryRange({ countryCount, onCountryRangeChange }: CountryRangeProps) {
-  const [start, setStart] = useState<number>();
-  const [end, setEnd] = useState<number>();
+  const [start, setStart] = useState<number>(1);
+  const [end, setEnd] = useState<number>(10);
 
   const handleChange = (values: [number, number]) => {
     const [newStart, newEnd] = values;
