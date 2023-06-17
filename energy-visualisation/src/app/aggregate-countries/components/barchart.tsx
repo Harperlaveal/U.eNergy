@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import { EnergyProductionData, EnergySourceProduction } from '@/app/country/interfaces';
-import { CountryDataContext } from '@/app/country/contexts/country-data-context';
-import { count } from 'console';
+import { EnergyProductionData } from '@/app/country/interfaces';
+import * as d3Tip from "d3-tip";
+import Tooltip from '@mui/material/Tooltip';
+import { Box, Typography } from '@mui/material';
 
 interface BarChartProps {
   countryData: {
@@ -12,15 +13,15 @@ interface BarChartProps {
   };
   countryRange: [number, number];
   year: number;
-  setSelectedCountry: React.Dispatch<React.SetStateAction<{ id: string; amount: number; } | null>>;
 }
 
-const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, setSelectedCountry }) => {
+const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) => {
   const ref = useRef<SVGSVGElement | null>(null);
 
   const countries = Object.keys(countryData);
   const excludedCountries = ["IEA Total", "OECD Americas", "OECD Europe", "OECD Asia Oceania"];
   const filteredCountries = countries.filter((country) => !excludedCountries.includes(country));
+  const [tooltipData, setTooltipData] = useState<{ id: string; amount: number; } | null>(null);
 
   let colourMap: { [country: string]: string } = {};
   filteredCountries.forEach((country, i) => {
@@ -55,6 +56,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
     
       const yAxis = d3.axisLeft(yScale);
       const xAxis = d3.axisBottom(xScale);
+
     
       svg.append('g')
         .attr('class', 'y-axis')
@@ -75,7 +77,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
     
       // Select all current bars within the parent group
       const bars = g.selectAll('.bar')
-        .data(totals, (total) => total.id);
+        .data(totals, (total: any) => total.id);
     
         bars.enter()
         .append('rect')
@@ -85,10 +87,16 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr('width', xScale.bandwidth())
         .attr('height', 0)
         .attr('fill', (total) => colourMap[total.id])
-        .on('click', function(event, total) { 
-            event.stopPropagation();
-            setSelectedCountry(total);
-        }) 
+        .on('mouseover', function(event, total) {
+          setTooltipData(total);
+        })
+        .on('mouseout', function(event, total) {
+          setTooltipData(null);
+        })
+        .on('click', function (event, total) {
+          event.stopPropagation();
+          window.location.href = `/country/${total.id}`;
+        })
         .transition()
         .duration(750)
         .attr('y', (total) => yScale(total.amount))
@@ -109,9 +117,19 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr('y', yScale(0))
         .attr('height', 0)
         .remove();
-    }, [ref, yScale, xScale, totals, setSelectedCountry, colourMap]);
+    }, [ref, yScale, xScale, totals, colourMap]);
     
   return (
+    <Tooltip 
+    open={!!tooltipData}
+    title={
+      <Box>
+        {tooltipData && <Typography>Country: {tooltipData.id}</Typography>}
+        {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
+      </Box>
+    }
+    placement="left"
+  >
     <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
       <g transform="translate(60, 20)">
         {/* X-axis */}
@@ -122,6 +140,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         <text x="-10" y="-10" fontSize="12">Total Watts Produced (TWh)</text>
       </g>
     </svg>
+  </Tooltip>
   );
 };
 

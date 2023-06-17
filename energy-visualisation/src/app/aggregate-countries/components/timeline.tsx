@@ -6,15 +6,16 @@ import PauseIcon from "@mui/icons-material/Pause";
 interface TimelineProps {
   years: number[];
   onYearChange: (year: number) => void;
-  rangeChanged: boolean; // new prop
-  setRangeChanged: (changed: boolean) => void; // new prop
+  rangeChanged: boolean; 
+  setRangeChanged: (changed: boolean) => void; 
 }
 
 export default function Timeline({ years, onYearChange, rangeChanged, setRangeChanged }: TimelineProps) {
   const [value, setValue] = useState<number>(years[years.length - 1]);
-  const [index, setIndex] = useState<number>(years.length - 1);
+  const index = useRef(years.length - 1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [tick, setTick] = useState(0); // State to trigger re-render
 
   useEffect(() => {
     return () => {
@@ -35,9 +36,10 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
       );
       const newIndex = years.findIndex((d) => d === closestYear);
       if (newIndex !== -1) {
-        setIndex(newIndex);
+        index.current = newIndex; // Update index ref here
       }
       if (isPlaying) {
+
         setIsPlaying(false);
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
@@ -49,44 +51,42 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
 
   const handlePlay = () => {
     if (rangeChanged) {
-      setRangeChanged(false); // Reset the flag to false after handling it
+      setRangeChanged(false);
       setIsPlaying(false);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     } else {
-      setIsPlaying(!isPlaying);
-      if (!isPlaying) {
-        intervalRef.current = setInterval(() => {
-          setIndex((prevIndex) => {
-            const nextIndex = prevIndex >= years.length - 1 ? 0 : prevIndex + 1;
-            return nextIndex;
-          });
-        }, 1000);
-      } else {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
+      setIsPlaying((prevIsPlaying) => {
+        if (!prevIsPlaying) {
+          intervalRef.current = setInterval(() => {
+            index.current = index.current >= years.length - 1 ? 0 : index.current + 1;
+            setTick((tick) => tick + 1);
+          }, 1000);
+          return true;
+        } else {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          return false;
         }
-      }
+      });
     }
   };
-
   useEffect(() => {
     if (rangeChanged) {
-      setRangeChanged(false); // Reset the flag to false after handling it
+      setRangeChanged(false);
       setIsPlaying(false);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     }
-  }, [rangeChanged, setRangeChanged]); // add rangeChanged to the dependency array
+  }, [rangeChanged, setRangeChanged]);
 
   useEffect(() => {
-    onYearChange(years[index]);
-    setValue(years[index]);
-  }, [index, onYearChange, years]);
-
-  const totalYears = years[years.length - 1] - years[0];
+    onYearChange(years[index.current]);
+    setValue(years[index.current]);
+  }, [tick, onYearChange, years]); // Add tick to the dependency array
 
   return (
     <div className="mt-8 w-full relative">
@@ -101,34 +101,12 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
         sx={{
           "& .MuiSlider-thumb": {
             transition: "left 0.3s ease-in-out",
-            "&:not(.MuiSlider-active)": {
-              transition: "width 0.3s ease-in-out",
+            "&:not(.Mui-disabled)": {
+              "&:before": { boxShadow: "0px 0px 0px 8px rgba(63,81,181,0.16)" },
             },
           },
         }}
       />
-      <div className="flex justify-between text-xs w-full">
-        {years.map((year, i) => (
-          <button
-            className={`hover: ${
-              year === value ? "text-blue-500" : ""
-            }`}
-            onClick={() => {
-              setIndex(i);
-              setValue(year);
-              onYearChange(year);
-            }}
-            key={year}
-            style={{
-              position: "absolute",
-              left: `${((year - years[0]) / totalYears) * 100}%`,
-              transform: "translateX(-50%)",
-            }}
-          >
-            {year}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
