@@ -286,6 +286,7 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
       <div className="flex flex-col w-[90%] items-center h-full">
         <h1 className="text-4xl font-bold z-10">Production Hierachy</h1>
         <h3 className="text-2xl font-bold z-10">Zoom and drag around to view the different countries based on Production Type</h3>
+        <h4 className="text-2xl font-bold z-10">Click back and forth to see the relation between the country and energy type</h4>
         <div className="flex flex-col">
           <div id="treemap"></div>
         </div>
