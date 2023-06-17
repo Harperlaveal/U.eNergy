@@ -8,7 +8,7 @@ import CountryTooltip from './components/country-tooltip';
 import { loadCSVData, createCountryData } from '../country/utils';
 import { EnergyProductionData } from '../country/interfaces';
 
-const AggregateCountriesPage = () => {
+const GlobalEnergyPage = () => {
   const [countryData, setCountryData] = useState<{ [country: string]: EnergyProductionData[] }>({});
   const [countryRange, setCountryRange] = useState<[number, number]>([1, 10]);
   const years: number[] = ([2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2020, 2021, 2022]);
@@ -56,4 +56,4 @@ const AggregateCountriesPage = () => {
   );
 };
 
-export default AggregateCountriesPage;
+export default GlobalEnergyPage;

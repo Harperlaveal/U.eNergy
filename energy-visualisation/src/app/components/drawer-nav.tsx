@@ -71,8 +71,8 @@ const NavItemList: NavItem[] = [
     icon: <FlagIcon />,
   },
   {
-    title: "Global Trends",
-    href: "/aggregate-countries",
+    title: "Global Energy",
+    href: "/global-energy",
     icon: <EarthIcon />,
   },
   {
