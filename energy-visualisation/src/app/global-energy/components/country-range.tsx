@@ -14,10 +14,15 @@ export default function CountryRange({ countryCount, onCountryRangeChange }: Cou
   const [end, setEnd] = useState<number>(10);
 
   const handleChange = (values: [number, number]) => {
+    const valuesDiff = values[1] - values[0];
     const [newStart, newEnd] = values;
-    onCountryRangeChange(values);
-    setStart(newStart);
-    setEnd(newEnd);
+
+    if (valuesDiff >= 1) {
+      onCountryRangeChange(values);
+      setStart(newStart);
+      setEnd(newEnd);
+    }
+
   };
 
   useEffect(() => {
@@ -26,7 +31,7 @@ export default function CountryRange({ countryCount, onCountryRangeChange }: Cou
   }, [countryCount]);
 
   return (
-    <><div className="w-3/4 h-3/4">Country Range Selection</div>
+    <><div className="flex ">Country Range Selection</div>
       <RangeSlider id="range-slider-gradient" min={1} max={countryCount} step={1} value={[start, end]} onInput={handleChange} className="margin-lg"></RangeSlider>
     </>
   );

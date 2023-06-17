@@ -93,6 +93,7 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
       <button onClick={handlePlay}>
         {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
       </button>
+      
       <Slider
         value={value}
         onChange={handleChange}
@@ -107,6 +108,26 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
           },
         }}
       />
+      <div className="flex justify-between text-xs w-full">
+      {years.map((year) => (
+        <button
+          className={`absolute ${
+            year === value ? "text-blue-500" : ""
+          }`}
+          onClick={() => {
+            setValue(year);
+            onYearChange(year);
+          }}
+          key={year}
+          style={{
+            left: `${((year - years[0]) / (years[years.length - 1] - years[0])) * 100}%`,
+            transform: "translateX(-50%)",
+          }}
+        >
+          {year}
+        </button>
+      ))}
+      </div>
     </div>
   );
 }

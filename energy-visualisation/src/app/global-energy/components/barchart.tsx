@@ -87,15 +87,20 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
         .attr('width', xScale.bandwidth())
         .attr('height', 0)
         .attr('fill', (total) => colourMap[total.id])
+        .attr('fill-opacity', 0.5)
+        .attr('stroke', (total) => colourMap[total.id])
         .on('mouseover', function(event, total) {
+          d3.select(this).attr('fill-opacity', 0.7);
+          d3.select(this).attr('cursor', 'pointer');
           setTooltipData(total);
         })
         .on('mouseout', function(event, total) {
+          d3.select(this).attr('fill-opacity', 0.5);
           setTooltipData(null);
         })
         .on('click', function (event, total) {
           event.stopPropagation();
-          window.location.href = `/country/${total.id}`;
+          window.location.href = `/country/${total.id}?initYear=${year}`;
         })
         .transition()
         .duration(750)
@@ -130,7 +135,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
     }
     placement="left"
   >
-    <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
+    <svg ref={ref} className="w-3/4 h-3/4 overflow-visible" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
       <g transform="translate(60, 20)">
         {/* X-axis */}
         <line x1="0" y1="160" x2={(countryRange[1] - countryRange[0]) * 50} y2="160" stroke="black" />
