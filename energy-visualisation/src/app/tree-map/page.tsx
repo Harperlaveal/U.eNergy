@@ -133,7 +133,7 @@ export const TreeMap = () => {
       }
 
       var isParentView = true;
-  
+
       var root = d3.hierarchy(hierarchyData).sum(sumByValue);
       // @ts-ignore
       treemap(root);
@@ -160,6 +160,14 @@ export const TreeMap = () => {
           .enter().append("g")
           .attr("class", "node")
           .attr("transform", function (d: any) { return "translate(" + d.x0 + "," + d.y0 + ")"; });
+        cell.append("clipPath")
+        // @ts-ignore
+        .attr("id", function(d) { return "clip-" + d.data.name })
+        .append("rect")
+        // @ts-ignore
+        .attr("width", function(d) { return d.x1 - d.x0; })
+        // @ts-ignore
+        .attr("height", function(d) { return d.y1 - d.y0; });
         cell.append("rect")
         // @ts-ignore
         .attr("id", function(d) { return d.data.name; })
@@ -167,8 +175,9 @@ export const TreeMap = () => {
         .attr("width", function(d) { return d.x1 - d.x0; })
         // @ts-ignore
         .attr("height", function(d) { return d.y1 - d.y0; })
-        .style("stroke", "#black")
-        .style("stroke-width", "1px")
+         .style("stroke", function(d) { return isParentView ? "black" : "none"; }) // add stroke color
+         .style("stroke-width", function(d) { return isParentView ? "2px" : "0px"; }) // add stroke width
+    
         // @ts-ignore
         .attr("fill", function(d) {
           if (!isParentView){
@@ -187,17 +196,19 @@ export const TreeMap = () => {
         });
 
         cell.append("text")
-          // @ts-ignore
-          .attr("clip-path", function(d) { return "url(#clip-" + d.data.name + ")"; })
-          .selectAll("tspan")
-          // @ts-ignore
-          .data(function(d) { return [d.data.name]; }) // Use the name directly, no split
-          .enter().append("tspan")
-          .attr("fontsize", "10px")
-          //.attr("font-size", d => isParentView ? "16px" : "10px")
-          .attr("x", 4)
-          .attr("y", 20) // Fixed position for the name
-          .text(function(d) { return d; });
+        // @ts-ignore
+        .attr("clip-path", function(d) { return "url(#clip-" + d.data.name + ")"; })
+        .selectAll("tspan")
+        //@ts-ignore
+        .data(function(d) { return [d.data.name]; }) // Use the name directly, no split
+        .enter().append("tspan")
+        //.attr("font-size", "16px" ) // Different sizes for parent and child
+        //If the view is parrent, and energy is coal than make the font white
+        // @ts-ignore
+        .attr("fill", function(d) { return isParentView && d === "Coal" ? "white" : "black"; })
+        .attr("x", 4)
+        .attr("y", 20) // Fixed position for the name
+        .text(function(d) { return d; });
       }
 
       /* Copy stu code ends */
@@ -266,7 +277,7 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
     <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
       <div className="flex flex-col w-[90%] items-center h-full">
         <h1 className="text-4xl font-bold z-10">Production Hierachy</h1>
-        <h3 className="text-2xl font-bold z-10">Click on a cell to see the next level of the hierarchy</h3>
+        <h3 className="text-2xl font-bold z-10">Zoom and drag around to view the different countries</h3>
         <div className="flex flex-col">
           <div id="treemap"></div>
         </div>
