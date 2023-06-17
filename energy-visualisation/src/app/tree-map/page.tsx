@@ -39,8 +39,6 @@ interface CountryNode {
 
 const allNodes: Map<string, Map<string, CountryNode[]>> = new Map();
 
-
-
 export const TreeMap = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [year, setYear] = useState<number>(2022);
@@ -98,13 +96,7 @@ export const TreeMap = () => {
         });
       });
 
-      console.log("allNodes before convert function");
-      console.log(allNodes);
       const hierarchyData = convertMapToGraph(allNodes); 
-
-      console.log("hierachy data: ");
-      console.log(hierarchyData);
-
 
       var width = 1300;
       var height = 800;
@@ -114,69 +106,34 @@ export const TreeMap = () => {
         .size([width, height])
         .padding(1)
         .round(true)
-        //.tile(d3.treemapSliceDice);
-        //.tile(d3.treemapBinary);
         .tile(d3.treemapSquarify); // we like this one :)
-        //.tile(d3.treemapResquarify);
-        //.tile(d3.treemapSlice);
-        //.tile(d3.treemapDice);
-
-
-      const customData = {
-        name: "root",
-        children: [
-          {
-            name: "Hydro",
-            children: [
-              { name: "Asia", children: [
-                { name: "China", value: 1 },
-                { name: "India", value: 1 }
-              ] },
-              { name: "Europe", children: [
-                { name: "Germany", value: 1 },
-                { name: "France", value: 1 },
-                { name: "Italy", value: 1 },
-                { name: "Spain", value: 1 },
-                { name: "United Kingdom", value: 1 },
-              ] },
-              { name: "North America", value: 1 },
-              { name: "Oceania", value: 1 },
-              { name: "South America", value: 1 },
-            ],
-          },
-          {
-            name: "Nuclear",
-            children: [
-              { name: "Asia", value: 1 },
-              { name: "Europe", value: 1 },
-              { name: "North America", value: 1 },
-              { name: "Oceania", value: 1 },
-              { name: "South America", value: 1 },
-            ],
-          },
-        ]
-      };
-      console.log("customData");
-      console.log(customData);
 
       /* Copy Stu code starts */
 
       // delete the old tree map if it exists
       d3.select("#treemap").select("*").remove();
 
+      const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', (event) => {
+        svg.attr('transform', event.transform);
+        svg.selectAll("text").attr('font-size', (d) => isParentView ? 16 / event.transform.k + "px" : 10 / event.transform.k + "px");
+      });
+
       var svg = d3.select("#treemap").
         append("svg").
         attr("width", width).
         attr("height", height).
-        on("click", switchView);
+        on("click", switchView).
+        // @ts-ignore
+        call(zoom).
+        append("g");
+        
 
       function sumByValue(d: any) {
         return d.value;
       }
 
       var isParentView = true;
-      
-
+  
       var root = d3.hierarchy(hierarchyData).sum(sumByValue);
       // @ts-ignore
       treemap(root);
@@ -210,7 +167,8 @@ export const TreeMap = () => {
         .attr("width", function(d) { return d.x1 - d.x0; })
         // @ts-ignore
         .attr("height", function(d) { return d.y1 - d.y0; })
-        .style("stroke", "1px solid black")
+        .style("stroke", "#black")
+        .style("stroke-width", "1px")
         // @ts-ignore
         .attr("fill", function(d) {
           if (!isParentView){
@@ -219,14 +177,12 @@ export const TreeMap = () => {
             // @ts-ignore
             var continent = String(d.parent.data.name);
             var color = String(continentToColorMap.get(continent));
-            // var color = getRandomColor();  
           } else {
             // @ts-ignore
             var type = d.data.name;
             var color = String(productionColorMap.get(type));
             return color;
           }
-          
           return color;
         });
 
@@ -237,7 +193,8 @@ export const TreeMap = () => {
           // @ts-ignore
           .data(function(d) { return [d.data.name]; }) // Use the name directly, no split
           .enter().append("tspan")
-          .attr("font-size", d => isParentView ? "16px" : "10px")
+          .attr("fontsize", "10px")
+          //.attr("font-size", d => isParentView ? "16px" : "10px")
           .attr("x", 4)
           .attr("y", 20) // Fixed position for the name
           .text(function(d) { return d; });
@@ -249,15 +206,6 @@ export const TreeMap = () => {
 
 //Write a function to convert the map to a hierarchy data structure that d3 can use
 // Create the node for each continent
-
-function getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  for (var i = 0; i < 6; i++){
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
 
 // Create the root node
 /**
@@ -311,47 +259,6 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
   
   }
 
-      /**
-       * @deprecated
-       * @param allNodes 
-       * @returns 
-       */
-      function convertMapToHierarchy(allNodes: Map<string, Map<string, CountryNode[]>>): CountryNode {
-        const root: CountryNode = { name: "All", value: 0, children: [] };
-      //Gets Energy method from map
-        allNodes.forEach((methodMap, method) => {
-          const methodNode: CountryNode = {
-            name: method,
-            value: 0,
-            children: [],
-          };
-          //Gets contienent from the Method
-          methodMap.forEach((continentMap, continent) => {
-            const continentNode: CountryNode = {
-              name: continent,
-              value: 0,
-              children: [],
-            };
-            //Gets country from the continent
-            continentMap.forEach((countries) => {
-              countries.children.forEach((country) => {
-                continentNode.children.push(country);
-                continentNode.value += country.value;
-              });
-            });
-            methodNode.children.push(continentNode);
-            methodNode.value += continentNode.value;
-          });
-          root.children.push(methodNode);
-          root.value += methodNode.value;
-        });
-      
-        return root;
-        
-      }
-
-      
-
   var width = 960;
   var height = 600;
 
@@ -359,20 +266,13 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
     <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
       <div className="flex flex-col w-[90%] items-center h-full">
         <h1 className="text-4xl font-bold z-10">Production Hierachy</h1>
+        <h3 className="text-2xl font-bold z-10">Click on a cell to see the next level of the hierarchy</h3>
         <div className="flex flex-col">
           <div id="treemap"></div>
         </div>
       </div>
     </div>
   );
-
-  /*
-     return (
-    <div>
-      <svg ref={svgRef} width={width} height={height} className="shadow-lg" />
-    </div>
-  );
-  */
 
 };
 
