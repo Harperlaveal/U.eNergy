@@ -1,8 +1,8 @@
-"use client";
-
 import React, { useEffect, useState } from 'react';
 import RangeSlider from 'react-range-slider-input';
+import './styles.css';
 import 'react-range-slider-input/dist/style.css';
+
 
 interface CountryRangeProps {
   countryCount: number;
@@ -22,7 +22,6 @@ export default function CountryRange({ countryCount, onCountryRangeChange }: Cou
       setStart(newStart);
       setEnd(newEnd);
     }
-
   };
 
   useEffect(() => {
@@ -31,8 +30,9 @@ export default function CountryRange({ countryCount, onCountryRangeChange }: Cou
   }, [countryCount]);
 
   return (
-    <><div className="flex ">Country Range Selection</div>
-      <RangeSlider id="range-slider-gradient" min={1} max={countryCount} step={1} value={[start, end]} onInput={handleChange} className="margin-lg"></RangeSlider>
+    <>
+      <div className="flex ">Country Range Selection</div>
+      <RangeSlider id="range-slider" min={1} max={countryCount} step={1} value={[start, end]} onInput={handleChange} className="margin-lg"></RangeSlider>
     </>
   );
 }

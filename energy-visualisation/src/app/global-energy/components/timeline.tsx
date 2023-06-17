@@ -96,6 +96,7 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
       
       <Slider
         value={value}
+        color="secondary"
         onChange={handleChange}
         min={parseInt(years[0].toString())}
         max={parseInt(years[years.length - 1].toString())}
@@ -103,7 +104,13 @@ export default function Timeline({ years, onYearChange, rangeChanged, setRangeCh
           "& .MuiSlider-thumb": {
             transition: "left 0.3s ease-in-out",
             "&:not(.Mui-disabled)": {
-              "&:before": { boxShadow: "0px 0px 0px 8px rgba(63,81,181,0.16)" },
+              transition: "left 0.3s ease-in-out",
+            },
+          },
+          "& .MuiSlider-track": {
+            transition: "width 0.3s ease-in-out",
+            "&:not(.MuiSlider-active)": {
+              transition: "width 0.3s ease-in-out",
             },
           },
         }}

@@ -15,6 +15,7 @@ const GlobalEnergyPage = () => {
   const [selectedYear, setSelectedYear] = useState<number>(2020);
   const [countryList, setCountryList] = useState<string[]>([]);
   const [rangeChanged, setRangeChanged] = useState(false);
+  const [countryCount, setCountryCount] = useState<number>(countryList.length);
 
   useEffect(() => {
     loadCSVData("/data/data.csv")
@@ -40,20 +41,22 @@ const GlobalEnergyPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen items-center justify-center w-full space-y-4 p-32">
+    <div className="flex flex-col h-screen items-center justify-center w-full space-y-[20px] p-32">
         <Timeline
           years={years}
           onYearChange={handleYearChange}
           rangeChanged={rangeChanged}
           setRangeChanged={setRangeChanged}
         />
+
         <BarChart
           countryData={countryData}
           countryRange={countryRange}
           year={selectedYear}
+          setCountryCount={setCountryCount}
         />
         <CountryRange
-          countryCount={countryList.length}
+          countryCount={countryCount}
           onCountryRangeChange={handleCountryRangeChange}
         />
     </div>

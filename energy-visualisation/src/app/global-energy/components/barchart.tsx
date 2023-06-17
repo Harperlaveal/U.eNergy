@@ -6,6 +6,7 @@ import { EnergyProductionData } from '@/app/country/interfaces';
 import * as d3Tip from "d3-tip";
 import Tooltip from '@mui/material/Tooltip';
 import { Box, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 interface BarChartProps {
   countryData: {
@@ -13,15 +14,18 @@ interface BarChartProps {
   };
   countryRange: [number, number];
   year: number;
+  setCountryCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) => {
+const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, setCountryCount }) => {
   const ref = useRef<SVGSVGElement | null>(null);
 
   const countries = Object.keys(countryData);
   const excludedCountries = ["IEA Total", "OECD Americas", "OECD Europe", "OECD Asia Oceania"];
   const filteredCountries = countries.filter((country) => !excludedCountries.includes(country));
   const [tooltipData, setTooltipData] = useState<{ id: string; amount: number; } | null>(null);
+
+  const { push } = useRouter();
 
   let colourMap: { [country: string]: string } = {};
   filteredCountries.forEach((country, i) => {
@@ -36,7 +40,8 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
       totalWatts = countryYearData.production.reduce((total, source) => total + Number(source.watts), 0);
     }
     return { amount: totalWatts, id: country };
-  });
+  }).filter((total) => total.amount !== 0);
+  setCountryCount(totals.length);
   totals.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
   totals = totals.slice(countryRange[0], countryRange[1]);
 
@@ -100,7 +105,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
         })
         .on('click', function (event, total) {
           event.stopPropagation();
-          window.location.href = `/country/${total.id}?initYear=${year}`;
+          push(`/country/${total.id}?initYear=${year}`);
         })
         .transition()
         .duration(750)
@@ -133,7 +138,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
         {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
       </Box>
     }
-    placement="left"
+    placement="top"
   >
     <svg ref={ref} className="w-3/4 h-3/4 overflow-visible" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
       <g transform="translate(60, 20)">
