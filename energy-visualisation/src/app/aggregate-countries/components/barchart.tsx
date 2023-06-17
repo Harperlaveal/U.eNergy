@@ -1,8 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+"use client";
+
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import { EnergyProductionData, EnergySourceProduction } from '@/app/country/interfaces';
-import { CountryDataContext } from '@/app/country/contexts/country-data-context';
-import { count } from 'console';
+import { EnergyProductionData } from '@/app/country/interfaces';
+import * as d3Tip from "d3-tip";
+import Tooltip from '@mui/material/Tooltip';
+import { Box, Typography } from '@mui/material';
 
 interface BarChartProps {
   countryData: {
@@ -10,15 +13,15 @@ interface BarChartProps {
   };
   countryRange: [number, number];
   year: number;
-  setSelectedCountry: React.Dispatch<React.SetStateAction<{ country: string; amount: number; id: string; } | null>>;
 }
 
-const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, setSelectedCountry }) => {
+const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) => {
   const ref = useRef<SVGSVGElement | null>(null);
 
   const countries = Object.keys(countryData);
   const excludedCountries = ["IEA Total", "OECD Americas", "OECD Europe", "OECD Asia Oceania"];
   const filteredCountries = countries.filter((country) => !excludedCountries.includes(country));
+  const [tooltipData, setTooltipData] = useState<{ id: string; amount: number; } | null>(null);
 
   let colourMap: { [country: string]: string } = {};
   filteredCountries.forEach((country, i) => {
@@ -44,42 +47,89 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
     .range([0, (countryRange[1] - countryRange[0]) * 50])
     .padding(0.2);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const svg = d3.select(ref.current);
+    useEffect(() => {
+      if (!ref.current) return;
+      const svg = d3.select(ref.current);
+    
+      svg.select('.y-axis').remove();
+      svg.select('.x-axis').remove();
+    
+      const yAxis = d3.axisLeft(yScale);
+      const xAxis = d3.axisBottom(xScale);
 
-    svg.select('.y-axis').remove();
-    svg.select('.x-axis').remove();
-
-    const yAxis = d3.axisLeft(yScale);
-    const xAxis = d3.axisBottom(xScale).tickSize(5);
-
-    svg.append('g')
-      .attr('class', 'y-axis')
-      .attr('transform', 'translate(60, 20)')
-      .call(yAxis);
-
-    svg.append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(60, ${yScale(0) + 20})`)
-      .call(xAxis)
-      .selectAll('text')
-      .style('font-size', '5px');
-
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 10])
-      .on('zoom', (event) => {
-        const newYScale = event.transform.rescaleY(yScale);
-        svg.select<SVGGElement>('.y-axis').call(yAxis.scale(newYScale));
-        svg.selectAll<SVGRectElement, { amount: number; id: string }>('rect')
-          .attr('y', (d) => newYScale(d.amount))
-          .attr('height', (d) => 160 - newYScale(d.amount));
-      });
-
-    svg.call(zoom);
-  }, [ref, yScale, totals]);
-
+    
+      svg.append('g')
+        .attr('class', 'y-axis')
+        .attr('transform', 'translate(60, 20)')
+        .call(yAxis);
+    
+        svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(60, ${yScale(0) + 20})`)
+        .call(xAxis)
+        .selectAll("text")
+        .attr("transform", "rotate(-45)") // adjust the angle as needed
+        .style("text-anchor", "end");
+    
+    
+      // Get the parent group of the bar chart
+      const g = svg.select("g");
+    
+      // Select all current bars within the parent group
+      const bars = g.selectAll('.bar')
+        .data(totals, (total: any) => total.id);
+    
+        bars.enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', (total) => xScale(total.id)!)
+        .attr('y', yScale(0))
+        .attr('width', xScale.bandwidth())
+        .attr('height', 0)
+        .attr('fill', (total) => colourMap[total.id])
+        .on('mouseover', function(event, total) {
+          setTooltipData(total);
+        })
+        .on('mouseout', function(event, total) {
+          setTooltipData(null);
+        })
+        .on('click', function (event, total) {
+          event.stopPropagation();
+          window.location.href = `/country/${total.id}`;
+        })
+        .transition()
+        .duration(750)
+        .attr('y', (total) => yScale(total.amount))
+        .attr('height', (total) => 160 - yScale(total.amount));
+    
+    
+      bars
+        .transition()
+        .duration(750)
+        .attr('x', (total) => xScale(total.id)!)
+        .attr('y', (total) => yScale(total.amount))
+        .attr('width', xScale.bandwidth())
+        .attr('height', (total) => 160 - yScale(total.amount));
+    
+      bars.exit()
+        .transition()
+        .duration(750)
+        .attr('y', yScale(0))
+        .attr('height', 0)
+        .remove();
+    }, [ref, yScale, xScale, totals, colourMap]);
+    
   return (
+    <Tooltip 
+    open={!!tooltipData}
+    title={
+      <Box>
+        {tooltipData && <Typography>Country: {tooltipData.id}</Typography>}
+        {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
+      </Box>
+    }
+    placement="left"
+  >
     <svg ref={ref} className="w-3/4 h-3/4" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
       <g transform="translate(60, 20)">
         {/* X-axis */}
@@ -104,6 +154,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         ))}
       </g>
     </svg>
+  </Tooltip>
   );
 };
 
