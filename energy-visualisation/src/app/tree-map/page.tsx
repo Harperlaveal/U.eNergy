@@ -44,6 +44,7 @@ export const TreeMap = () => {
   const [year, setYear] = useState<number>(2022);
   // a number state called depth
   const [depth, setDepth] = useState<number>(0);
+  const [hoveredChild, setHoveredChild] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -177,7 +178,7 @@ export const TreeMap = () => {
         .attr("height", function(d) { return d.y1 - d.y0; })
          .style("stroke", function(d) { return isParentView ? "black" : "none"; }) // add stroke color
          .style("stroke-width", function(d) { return isParentView ? "2px" : "0px"; }) // add stroke width
-    
+        
         // @ts-ignore
         .attr("fill", function(d) {
           if (!isParentView){
@@ -196,24 +197,31 @@ export const TreeMap = () => {
         });
 
         cell.append("text")
+        .attr("class", "node-text")
         // @ts-ignore
         .attr("clip-path", function(d) { return "url(#clip-" + d.data.name + ")"; })
         .selectAll("tspan")
         //@ts-ignore
         .data(function(d) { return [d.data.name]; }) // Use the name directly, no split
         .enter().append("tspan")
-        //.attr("font-size", "16px" ) // Different sizes for parent and child
-        //If the view is parrent, and energy is coal than make the font white
+        //Set the text of the child nodes to be smaller, but make the zoom functionality still work
+
+        // @ts-ignore
+        .attr("font-size", function(d) { return isParentView ? "16px" : "6px"; })
+        // @ts-ignore
+      
+        //.attr("font-size"," 8px")
         // @ts-ignore
         .attr("fill", function(d) { return isParentView && d === "Coal" ? "white" : "black"; })
         .attr("x", 4)
         .attr("y", 20) // Fixed position for the name
-        .text(function(d) { return d; });
+        .text(function(d) { return d; });    
       }
 
       /* Copy stu code ends */
     });
   }, [year]);
+
 
 //Write a function to convert the map to a hierarchy data structure that d3 can use
 // Create the node for each continent
@@ -277,7 +285,7 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
     <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
       <div className="flex flex-col w-[90%] items-center h-full">
         <h1 className="text-4xl font-bold z-10">Production Hierachy</h1>
-        <h3 className="text-2xl font-bold z-10">Zoom and drag around to view the different countries</h3>
+        <h3 className="text-2xl font-bold z-10">Zoom and drag around to view the different countries based on Production Type</h3>
         <div className="flex flex-col">
           <div id="treemap"></div>
         </div>
