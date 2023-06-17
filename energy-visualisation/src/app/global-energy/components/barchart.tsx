@@ -7,6 +7,7 @@ import * as d3Tip from "d3-tip";
 import Tooltip from '@mui/material/Tooltip';
 import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { transition } from 'd3';
 
 interface BarChartProps {
   countryData: {
@@ -41,6 +42,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
     }
     return { amount: totalWatts, id: country };
   }).filter((total) => total.amount !== 0);
+  
   setCountryCount(totals.length);
   totals.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
   totals = totals.slice(countryRange[0], countryRange[1]);
@@ -55,36 +57,43 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
     useEffect(() => {
       if (!ref.current) return;
       const svg = d3.select(ref.current);
-    
+      
+      // Remove old Y-axis and X-axis
       svg.select('.y-axis').remove();
       svg.select('.x-axis').remove();
     
+      // Create axes
       const yAxis = d3.axisLeft(yScale);
       const xAxis = d3.axisBottom(xScale);
-
     
+      // Y-axis
       svg.append('g')
         .attr('class', 'y-axis')
         .attr('transform', 'translate(60, 20)')
         .call(yAxis);
     
-        svg.append('g')
+      // X-axis
+      const xAxisG = svg.append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(60, ${yScale(0) + 20})`)
-        .call(xAxis)
-        .selectAll("text")
-        .attr("transform", "rotate(-45)") // adjust the angle as needed
+        .call(xAxis);
+    
+      xAxisG
+        .selectAll(".tick")
+        .data(totals, (total: any) => total.id)
+        .transition().duration(750)
+        .attr("transform", (d: { id: any }) => `translate(${xScale(d.id)},0)`);
+    
+      xAxisG.selectAll("text")
+        .attr("transform", "rotate(-45)")
         .style("text-anchor", "end");
-    
-    
-      // Get the parent group of the bar chart
-      const g = svg.select("g");
-    
-      // Select all current bars within the parent group
-      const bars = g.selectAll('.bar')
+
+      // Select bars
+      const bars = svg.select('g').selectAll('.bar')
         .data(totals, (total: any) => total.id);
-    
-        bars.enter()
+      
+      // Enter selection
+      bars.enter()
         .append('rect')
         .attr('class', 'bar')
         .attr('x', (total) => xScale(total.id)!)
@@ -94,12 +103,12 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr('fill', (total) => colourMap[total.id])
         .attr('fill-opacity', 0.5)
         .attr('stroke', (total) => colourMap[total.id])
-        .on('mouseover', function(event, total) {
+        .on('mouseover', function (event, total) {
           d3.select(this).attr('fill-opacity', 0.7);
           d3.select(this).attr('cursor', 'pointer');
           setTooltipData(total);
         })
-        .on('mouseout', function(event, total) {
+        .on('mouseout', function (event, total) {
           d3.select(this).attr('fill-opacity', 0.5);
           setTooltipData(null);
         })
@@ -111,8 +120,8 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .duration(750)
         .attr('y', (total) => yScale(total.amount))
         .attr('height', (total) => 160 - yScale(total.amount));
-    
-    
+
+      // Update selection
       bars
         .transition()
         .duration(750)
@@ -120,37 +129,39 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr('y', (total) => yScale(total.amount))
         .attr('width', xScale.bandwidth())
         .attr('height', (total) => 160 - yScale(total.amount));
-    
+
+      // Exit selection
       bars.exit()
         .transition()
         .duration(750)
         .attr('y', yScale(0))
         .attr('height', 0)
         .remove();
+
     }, [ref, yScale, xScale, totals, colourMap]);
-    
+
   return (
     <Tooltip 
-    open={!!tooltipData}
-    title={
-      <Box>
-        {tooltipData && <Typography>Country: {tooltipData.id}</Typography>}
-        {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
-      </Box>
-    }
-    placement="top"
-  >
-    <svg ref={ref} className="w-3/4 h-3/4 overflow-visible" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
-      <g transform="translate(60, 20)">
-        {/* X-axis */}
-        <line x1="0" y1="160" x2={(countryRange[1] - countryRange[0]) * 50} y2="160" stroke="black" />
+      open={!!tooltipData}
+      title={
+        <Box>
+          {tooltipData && <Typography>Country: {tooltipData.id}</Typography>}
+          {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
+        </Box>
+      }
+      placement="top"
+    >
+      <svg ref={ref} className="w-3/4 h-3/4 overflow-visible" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
+        <g transform="translate(60, 20)">
+          {/* X-axis */}
+          <line x1="0" y1="160" x2={(countryRange[1] - countryRange[0]) * 50} y2="160" stroke="black" />
 
-        {/* Axis labels */}
-        <text x="-50" y="180" fontSize="12">{year}</text>
-        <text x="-10" y="-10" fontSize="12">Total Watts Produced (TWh)</text>
-      </g>
-    </svg>
-  </Tooltip>
+          {/* Axis labels */}
+          <text x="-50" y="180" fontSize="12">{year}</text>
+          <text x="-10" y="-10" fontSize="12">Total Watts Produced (TWh)</text>
+        </g>
+      </svg>
+    </Tooltip>
   );
 };
 

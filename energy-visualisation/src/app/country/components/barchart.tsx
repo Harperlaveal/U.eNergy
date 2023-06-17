@@ -59,147 +59,97 @@ export default function BarChart({ data, max }: BarChartProps) {
   };
 
   useEffect(() => {
-    if (!data || !svgRef.current || !wrapperRef.current) return;
+    if (!ref.current) return;
+    const svg = d3.select(ref.current);
 
-    data.production.sort((a, b) => b.watts - a.watts);
+    // X scale
+    const xScale = d3.scaleBand()
+        .domain(totals.map((total) => total.id))
+        .range([60, width])
+        .padding(0.1);
 
-    const svg = select(svgRef.current);
+    // Y scale
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(totals, (total) => total.value)])
+        .range([height, 20]);
 
-    const width = wrapperRef.current.clientWidth;
-    const height = 500;
-    const margin = { top: 20, right: 20, bottom: 50, left: 100 };
+    // Colour scale
+    const colourMap = d3.scaleOrdinal()
+        .domain(totals.map((total) => total.id))
+        .range(d3.schemeSet2);
 
-    const xScale = scaleLinear()
-      .domain([0, max])
-      .range([0, width - margin.right - margin.left]);
+    // remove the old Y-axis
+    svg.select('.y-axis').remove();
 
-    const yScale = scaleBand()
-      .domain(data.production.map((d) => d.source))
-      .range([margin.top, height - margin.bottom])
-      .padding(0.2);
+    // remove the old X-axis
+    svg.select('.x-axis').remove();
 
-    const yAxis = axisLeft(yScale).tickSizeOuter(0);
-    const xAxis = axisBottom(xScale);
+    // Create axes
+    const yAxis = d3.axisLeft(yScale);
+    const xAxis = d3.axisBottom(xScale);
 
-    const t = transition().duration(1000);
+    svg.append('g')
+        .attr('class', 'y-axis')
+        .attr('transform', 'translate(60, 20)')
+        .call(yAxis);
 
-    const yAxisG = svg
-      .select<SVGGElement>(".y-axis")
-      .attr("transform", `translate(${margin.left}, 0)`);
+    // Create transition
+    const t = d3.transition().duration(1000);
 
-    yAxisG
-      .selectAll(".tick")
-      .data(data.production, (d: any) => d.source)
-      .transition(t)
-      .attr("transform", (d) => `translate(0,${yScale(d.source)})`);
+    const xAxisG = svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(0, ${yScale(0) + 20})`);
 
-    yAxisG.transition(t).call(yAxis);
+    // Transition the x-axis
+    xAxisG.transition(t).call(xAxis)
+        .selectAll("text")
+        .attr("transform", "rotate(-45)") // adjust the angle as needed
+        .style("text-anchor", "end");
 
-    const xAxisG = svg
-      .select<SVGGElement>(".x-axis")
-      .attr("transform", `translate(${margin.left},${height - margin.bottom})`);
+    // Get the parent group of the bar chart
+    const g = svg.select("g");
 
-    xAxisG.transition(t).call(xAxis);
+    // Select all current bars within the parent group
+    const bars = g.selectAll('.bar')
+        .data(totals, (total: any) => total.id);
 
-    const tooltip = select("body")
-      .append("div")
-      .attr(
-        "class",
-        "tooltip rounded p-2 text-center shadow-lg border-2 bg-white dark:bg-black"
-      )
-      .style("position", "absolute")
-      .style("visibility", "hidden")
-      .style("background-color", tooltipBackgroundColor)
-      .style("color", labelColor);
+    // Use the .enter() method to get your entering elements:
+    const entering = bars.enter();
 
-    const yLabels = yAxisG.selectAll(".tick text");
+    // Use the .exit() method to get your exiting elements:
+    const exiting = bars.exit();
 
-    yLabels
-      .style("cursor", "pointer")
-      .on("mouseover", function (event, d) {
-        tooltip.style("visibility", "visible");
-        const correspondingData = data.production.find(
-          (item) => item.source === d
-        );
-        if (correspondingData) {
-          setActiveItem(correspondingData.source);
-        }
-      })
-      .on("mousemove", function (event, d) {
-        // Find the corresponding data for this y-axis label
-        const correspondingData = data.production.find(
-          (item) => item.source === d
-        );
-        if (correspondingData) {
-          tooltip
-            .style("top", `${event.pageY - 10}px`)
-            .style("left", `${event.pageX + 10}px`)
-            .style("visibility", "visible")
-            // if its less than 1TWh, don't truncate
-            .html(
-              `Method: ${correspondingData.source}<br>Amount: ${
-                correspondingData.watts >= 1
-                  ? Math.trunc(correspondingData.watts)
-                  : correspondingData.watts
-              }TWh`
-            );
-        }
-      })
-      .on("mouseout", function () {
-        tooltip.style("visibility", "hidden");
-      });
-
-    yLabels.exit().remove();
-
-    const bars = svg
-      .selectAll<SVGRectElement, EnergySourceProduction>("rect")
-      .data(data.production, (d) => d.source);
-
+    // Update bars
     bars
-      .enter()
-      .append("rect")
-      .attr("y", (d) => yScale(d.source) || 0)
-      .attr("x", margin.left) // Bars start at y-axis
-      .attr("width", 0) // Initial width is 0
-      .attr("height", yScale.bandwidth())
-      .attr("fill", colorFn)
-      .attr("fill-opacity", 0.5)
-      .attr("stroke", colorFn)
-      .on("mouseover", function (event, d) {
-        select(this).style("fill-opacity", 0.8);
-        select(this).style("cursor", "pointer");
-        setActiveItem(d.source);
-      })
-      .on("mousemove", function (event, d) {
-        tooltip
-          .style("top", `${event.pageY - 10}px`)
-          .style("left", `${event.pageX + 10}px`)
-          .style("visibility", "visible")
-          // if its less than 1TWh, don't truncate
-          .html(
-            `Method: ${d.source}<br>Amount: ${
-              d.watts >= 1 ? Math.trunc(d.watts) : d.watts
-            }TWh`
-          );
-      })
-      .on("mouseout", function () {
-        tooltip.style("visibility", "hidden");
-        select(this).style("fill-opacity", 0.5);
-        setActiveItem(null);
-      })
-      .merge(bars)
-      .transition(t)
-      .attr("x", margin.left)
-      .attr("width", (d) => xScale(d.watts))
-      .attr("y", (d) => yScale(d.source) || 0)
-      .attr("height", yScale.bandwidth());
+        .attr("class", "bar update")
+        .attr("x", (d) => xScale(d.id)!)
+        .attr("y", (d) => yScale(d.value))
+        .attr("width", xScale.bandwidth())
+        .attr("height", (d) => yScale(0) - yScale(d.value))
+        .attr("fill", (d) => colourMap(d.id));
 
-    bars.exit().remove();
+    // Add bars
+    entering
+        .append("rect")
+        .attr("class", "bar enter")
+        .attr("x", (d) => xScale(d.id)!)
+        .attr("y", yScale(0))
+        .attr("width", xScale.bandwidth())
+        .attr("height", 0)
+        .attr("fill", (d) => colourMap(d.id))
+        .transition(t)
+        .attr("y", (d) => yScale(d.value))
+        .attr("height", (d) => yScale(0) - yScale(d.value));
 
-    return () => {
-      tooltip.style("visibility", "hidden");
-    };
-  }, [data, theme]);
+    // Remove bars
+    exiting
+        .attr("class", "bar exit")
+        .transition(t)
+        .attr("y", yScale(0))
+        .attr("height", 0)
+        .remove();
+
+}, [ref, width, height, totals]);
 
   interface LegendItemProps {
     color: string;
