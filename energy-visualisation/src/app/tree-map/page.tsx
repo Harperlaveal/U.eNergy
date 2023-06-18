@@ -221,7 +221,11 @@ export const TreeMap = () => {
             // console.log("name: " + name + " TWh produced: " + value + " isCountry: " + isCountry);
             setHover({name: name, value: value, isCountry: isCountry, continent: "", method: ""});
           }
-        });
+          d3.select(this).style("fill-opacity", 0.5);
+          })
+        .on("mouseleave", function(d) {
+           d3.select(this).style("fill-opacity", 1); // make the rectangle fully opaque again
+          });
 
         cell.append("text")
         .attr("class", "node-text")
@@ -242,7 +246,8 @@ export const TreeMap = () => {
         .attr("fill", function(d) { return isParentView && d === "Coal" ? "white" : "black"; })
         .attr("x", 4)
         .attr("y", 20) // Fixed position for the name
-        .text(function(d) { return d; });    
+        .text(function(d) { return d; })   
+        .style("opacity", function() { return !isParentView ? "0": "1";});
       }
 
       /* Copy stu code ends */
