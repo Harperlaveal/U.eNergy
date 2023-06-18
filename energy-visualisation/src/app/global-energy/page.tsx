@@ -8,7 +8,7 @@ import { loadCSVData, createCountryData } from '../country/utils';
 import { CSVRow, EnergyProductionData } from '../country/interfaces';
 import { RenewableDataContainer } from './interfaces';
 import SustainabilityBarChart from './components/sustainabilityBarChart';
-import CountryLoader from '../country/components/country-loader/country-loader';
+import Energyloader from './components/energy-loader/energy-loader';
 import { ThemeContext } from "../contexts/theme-context";
 
 const GlobalEnergyPage = () => {
@@ -94,8 +94,8 @@ const GlobalEnergyPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full">
-        <CountryLoader />
+      <div className="flex flex-col items-center justify-center h-screen w-full">
+        <Energyloader />
       </div>
     );
   }
