@@ -31,7 +31,6 @@ export default function CountryRange({ countryCount, onCountryRangeChange }: Cou
 
   return (
     <>
-      <div className="flex ">Country Range Selection</div>
       <RangeSlider id="range-slider" min={1} max={countryCount} step={1} value={[start, end]} onInput={handleChange} className="margin-lg"></RangeSlider>
     </>
   );
