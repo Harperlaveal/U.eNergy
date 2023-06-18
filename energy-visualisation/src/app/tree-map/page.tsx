@@ -37,6 +37,14 @@ interface CountryNode {
   children: CountryNode[];
 }
 
+interface HoverData{ // mouse hover event data structure
+  name: string;
+  value: number;
+  method: string;
+  isCountry: boolean;
+  continent: string;
+}
+
 const allNodes: Map<string, Map<string, CountryNode[]>> = new Map();
 
 export const TreeMap = () => {
@@ -46,6 +54,7 @@ export const TreeMap = () => {
   const [depth, setDepth] = useState<number>(0);
   const [hoveredChild, setHoveredChild] = useState<string | null>(null);
 
+  const [hover, setHover] = useState<HoverData>(null as any); // Mouse hover event state variable
 
   useEffect(() => {
     d3.csv("data/data.csv").then((data) => {
@@ -194,6 +203,24 @@ export const TreeMap = () => {
             return color;
           }
           return color;
+        })
+        .on("mouseenter", function(d) {
+          // Respond to mouse hover events
+          // console.log("d in mouseenter function: ");
+          // console.log(d); // d is the mouse event object
+          const data = d.target.__data__;
+          const name = data.data.name;
+          const value = data.value;
+          const isCountry = data.children === undefined;
+          if (isCountry) {
+            const continent = data.parent.data.name;
+            const method = data.parent.parent.data.name;
+            // console.log("name: " + name + " TWh produced: " + value + " isCountry: " + isCountry + " continent: " + continent + " method: " + method);
+            setHover({name: name, value: value, isCountry: isCountry, continent: continent, method: method});
+          } else {
+            // console.log("name: " + name + " TWh produced: " + value + " isCountry: " + isCountry);
+            setHover({name: name, value: value, isCountry: isCountry, continent: "", method: ""});
+          }
         });
 
         cell.append("text")
@@ -287,6 +314,19 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
         <h1 className="text-4xl font-bold z-10">Production Hierachy</h1>
         <h3 className="text-2xl font-bold z-10">Zoom and drag around to view the different countries based on Production Type</h3>
         <h4 className="text-2xl font-bold z-10">Click back and forth to see the relation between the country and energy type</h4>
+        {/* Show details on demand when we mouse hover over a tree map square */}
+        {/*TODO How do we move this div to be on the right hand side of the visualization instead of above it?*/}
+        <div id="detailsProvider" className="flex flex-col flex-grow space-y-1 p-5">
+          {(hover === undefined || hover === null) ? null : (
+            <div className="flex flex-row">
+            <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-center">Details</h1>
+            <h3 className="text-xl font-bold text-center">{hover?.name}{hover?.isCountry ? ", " + hover?.continent : ": " + hover?.value.toFixed(0) + " TWh"}</h3>
+            {hover?.isCountry ? <h3 className="text-xl font-bold text-center">{hover?.method + ": " + hover?.value.toFixed(0) + " TWh"}</h3> : null }
+            </div>
+            </div>
+          )}
+        </div>
         <div className="flex flex-col">
           <div id="treemap"></div>
         </div>
