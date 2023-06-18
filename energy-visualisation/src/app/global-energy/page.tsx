@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import BarChart from './components/barchart';
 import Timeline from './components/timeline';
 import CountryRange from './components/country-range';
@@ -8,6 +8,8 @@ import { loadCSVData, createCountryData } from '../country/utils';
 import { CSVRow, EnergyProductionData } from '../country/interfaces';
 import { RenewableDataContainer } from './interfaces';
 import SustainabilityBarChart from './components/sustainabilityBarChart';
+import CountryLoader from '../country/components/country-loader/country-loader';
+import { ThemeContext } from "../contexts/theme-context";
 
 const GlobalEnergyPage = () => {
   const [countryData, setCountryData] = useState<{ [country: string]: EnergyProductionData[] }>({});
@@ -19,6 +21,8 @@ const GlobalEnergyPage = () => {
   const [rangeChanged, setRangeChanged] = useState(false);
   const [countryCount, setCountryCount] = useState<number>(countryList.length);
   const [selectedVisualisation, setSelectedVisualisation] = useState<string>("energy");
+  const [isLoading, setIsLoading] = useState(true);
+  const { theme } = useContext(ThemeContext);
 
   const createSustainabilityData = (allRows: CSVRow[]): { [country: string]: RenewableDataContainer[] } => {
     const countrySustainabilityData: { [country: string]: RenewableDataContainer[] } = {};
@@ -67,6 +71,8 @@ const GlobalEnergyPage = () => {
 
         const uniqueCountries = Array.from(new Set(data.map((row: { COUNTRY: any; }) => row.COUNTRY)));
         setCountryList(uniqueCountries);
+
+        setIsLoading(false);
       })
       .catch((error: any) => {
         console.error("Failed to load country data", error);
@@ -86,11 +92,19 @@ const GlobalEnergyPage = () => {
     setSelectedVisualisation(event.target.value);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full">
+        <CountryLoader />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-screen items-center justify-center w-full space-y-[20px] p-32">
+    <div className={`flex flex-col h-screen items-center justify-center w-full space-y-[20px] p-32 ${theme === 'dark' ? 'bg-black-800 text-white' : ''}`}>
       <div className="flex space-x-4">
-            <div className="w-64">
-                <select onChange={handleVisualisationChange} className="w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline">
+        <div className="w-64">
+          <select onChange={handleVisualisationChange} className={`w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline ${theme === 'dark' ? 'bg-black text-white' : ''}`}>
                     <option value="energy">Energy</option>
                     <option value="sustainability">Sustainability</option>
                 </select>

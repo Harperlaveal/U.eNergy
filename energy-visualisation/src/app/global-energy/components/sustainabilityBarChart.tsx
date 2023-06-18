@@ -128,6 +128,7 @@ const SustainabilityBarChart: React.FC<SustainabilityBarChartProps> = ({
       .attr('height', (d) => yScale(0) - yScale(d.renewable))
       .attr('fill', 'green')
       .attr('fill-opacity', 0.5)
+      .attr('stroke', 'green')
       .on('mouseover', function (event, d) {
         d3.select(this).attr('fill-opacity', 0.7);
         d3.select(this).attr('cursor', 'pointer');
@@ -151,6 +152,7 @@ const SustainabilityBarChart: React.FC<SustainabilityBarChartProps> = ({
       .attr('height', (d) => yScale(0) - yScale(d.nonRenewable))
       .attr('fill', 'red')
       .attr('fill-opacity', 0.5)
+      .attr('stroke', 'red')
       .on('mouseover', function (event, d) {
         d3.select(this).attr('fill-opacity', 0.7);
         d3.select(this).attr('cursor', 'pointer');
@@ -201,7 +203,7 @@ const SustainabilityBarChart: React.FC<SustainabilityBarChartProps> = ({
           )}
         </Box>
       }
-      placement="top"
+      placement="left"
     >
       <svg
         ref={ref}

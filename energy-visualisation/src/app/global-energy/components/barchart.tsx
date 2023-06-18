@@ -171,7 +171,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
           {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
         </Box>
       }
-      placement="top"
+      placement="left"
     >
       <svg ref={ref} className="w-3/4 h-3/4 overflow-visible" viewBox={`0 0 ${(countryRange[1] - countryRange[0]) * 50 + 80} 200`}>
         <g transform="translate(60, 20)">
