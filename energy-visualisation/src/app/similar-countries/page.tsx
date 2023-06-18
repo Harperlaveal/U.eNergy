@@ -76,7 +76,7 @@ export const SimilarCountriesPage = () => {
   const [selectedCountry, setSelectedCountry] = useState<Country>(null as any);
   const [years, setYears] = useState<string[]>([]);
   const [year, setYear] = useState<string>("2022");
-  const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.7); // The closer to 1, the more similar the countries are
+  const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.86); // The closer to 1, the more similar the countries are
   const [selectedMethod, setSelectedMethod] = useState<string>("");
 
   const maxThreshold: number = 1;
