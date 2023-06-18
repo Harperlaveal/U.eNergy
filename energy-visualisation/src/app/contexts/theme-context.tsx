@@ -26,6 +26,7 @@ interface ThemeProviderProps {
 export const colors = {
   vuwGreen: "#0D4C38",
   primary: "#A5DBA3",
+  secondary: "#aed5f7",
 };
 
 declare module "@mui/material/styles" {
@@ -57,6 +58,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
         main: colors.primary,
       },
       vuwGreen: colors.vuwGreen,
+      secondary: {
+        main: colors.secondary,
+      },
     },
   });
 
