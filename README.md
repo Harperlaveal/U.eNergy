@@ -25,7 +25,7 @@ Please observe the [Milestone Page](https://gitlab.ecs.vuw.ac.nz/sansonbenj/swen
 4. Run the command ```npm run dev``` to start the web server
 5. The website can be accessed from ```localhost:3000```
 6. Use the left hand side navigation menu to visit different pages on the website 
-7. If elements of the webpage look abnormal, please zoom out in your web browser. THe website was designed for a 1920x1080 screen.
+7. If elements of the webpage look abnormal, please zoom out in your web browser. The website was designed for a 1920x1080 screen.
 
 - Make sure you have ```npm``` installed on your computer. ```npm``` is acquired by installing ```node js``` on your computer. The university computers should already have it installed. 
 - Make sure you have opened visual studio code in the correct folder. You can check which folder you are in by running the command ```pwd```. You should be inside the ```.../swen422-assignment3/energy-visualisation``` folder when running ```npm``` commands.
