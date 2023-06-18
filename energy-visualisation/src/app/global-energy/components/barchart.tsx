@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import * as d3 from 'd3';
 import { EnergyProductionData } from '@/app/country/interfaces';
 import * as d3Tip from "d3-tip";
@@ -8,6 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { transition } from 'd3';
+import { ThemeContext } from '@/app/contexts/theme-context';
 
 interface BarChartProps {
   countryData: {
@@ -25,8 +26,8 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
   const excludedCountries = ["IEA Total", "OECD Americas", "OECD Europe", "OECD Asia Oceania"];
   const filteredCountries = countries.filter((country) => !excludedCountries.includes(country));
   const [tooltipData, setTooltipData] = useState<{ id: string; amount: number; } | null>(null);
-
   const { push } = useRouter();
+  const { theme } = useContext(ThemeContext);
 
   let colourMap: { [country: string]: string } = {};
   filteredCountries.forEach((country, i) => {
@@ -35,7 +36,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
   });
 
   let totals = filteredCountries.map((country) => {
-    const countryYearData = countryData[country].find((data) => data.year === year.toString());
+    const countryYearData = countryData[country].find((data) => data.year == year);
     let totalWatts = 0;
     if (countryYearData) {
       totalWatts = countryYearData.production.reduce((total, source) => total + Number(source.watts), 0);
@@ -61,6 +62,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
       // Remove old Y-axis and X-axis
       svg.select('.y-axis').remove();
       svg.select('.x-axis').remove();
+      svg.selectAll('text').remove();
     
       // Create axes
       const yAxis = d3.axisLeft(yScale);
@@ -77,6 +79,26 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr('class', 'x-axis')
         .attr('transform', `translate(60, ${yScale(0) + 20})`)
         .call(xAxis);
+
+        const textColor = theme === "dark" ? "white" : "black";
+
+        svg.append("text")             
+        .attr("transform",
+              "translate(" + (25) + " ," + 
+                             (200) + ")")
+        .style("text-anchor", "middle")
+        .text(year)
+        .attr("font-size", "12px")
+        .attr("fill", textColor);
+        
+      svg.append("text")
+        .attr("y", -10)
+        .attr("x", 100)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Total Watts Produced (TWh)")
+        .attr("font-size", "12px")
+        .attr("fill", textColor);
     
       xAxisG
         .selectAll(".tick")
@@ -155,10 +177,6 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         <g transform="translate(60, 20)">
           {/* X-axis */}
           <line x1="0" y1="160" x2={(countryRange[1] - countryRange[0]) * 50} y2="160" stroke="black" />
-
-          {/* Axis labels */}
-          <text x="-50" y="180" fontSize="12">{year}</text>
-          <text x="-10" y="-10" fontSize="12">Total Watts Produced (TWh)</text>
         </g>
       </svg>
     </Tooltip>
