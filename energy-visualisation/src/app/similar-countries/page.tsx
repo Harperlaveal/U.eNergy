@@ -77,6 +77,7 @@ export const SimilarCountriesPage = () => {
   const [years, setYears] = useState<string[]>([]);
   const [year, setYear] = useState<string>("2022");
   const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.7); // The closer to 1, the more similar the countries are
+  const [selectedMethod, setSelectedMethod] = useState<string>("");
 
   const maxThreshold: number = 1;
   const minThreshold: number = -1;
@@ -94,6 +95,7 @@ export const SimilarCountriesPage = () => {
       var typeOfClicked: string = clicked.tagName;
       if (typeOfClicked !== "circle") {
         setSelectedCountry(null as any);
+        if (selectedMethod !== "") setSelectedMethod("");
       }
     });
 
@@ -544,6 +546,17 @@ export const SimilarCountriesPage = () => {
         .join("circle")
         .attr("r", 5)
         .attr("fill", (d: any) => productionColors[d.group])
+        .attr("fill-opacity", (d: any) => { 
+          if (selectedMethod !== ""){
+            if (d.largestMethod === selectedMethod){
+              return 1;
+            } else {
+              return 0.2;
+            }
+          } else {
+            return 1;
+          }
+         })
         // Create a popup when a node is clicked with information about the node
         .on("click", (event: any, d: any) => {
           setSelectedCountry(d as Country);
@@ -590,7 +603,7 @@ export const SimilarCountriesPage = () => {
         event.subject.fy = null;
       }
     });
-  }, [year, similarityThreshold]);
+  }, [year, similarityThreshold, selectedMethod]);
   /*This argument causes this function to be recalled if the selected year or similarity threshold changes*/
 
   return (
@@ -672,7 +685,7 @@ export const SimilarCountriesPage = () => {
                   ? "white"
                   : "black";
               return (
-                <div key={methodName} className="color-map-entry">
+                <div key={methodName} className="color-map-entry" onClick = { () => { setSelectedMethod(methodName) } }>
                   <div
                     className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100"
                     style={{ backgroundColor: color, color: textColor }}
