@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { getCode } from 'iso-3166-1-alpha-2';
 import { getContinentName } from '@brixtol/country-continent';
+import './style.css';
 import { compileFunction } from 'vm';
 
 const productionColorMap: Map<string, string> = new Map([
@@ -55,6 +56,7 @@ export const TreeMap = () => {
   const [hoveredChild, setHoveredChild] = useState<string | null>(null);
 
   const [hover, setHover] = useState<HoverData>(null as any); // Mouse hover event state variable
+  //const [isParentView, setIsParentView] = useState(true);
 
   useEffect(() => {
     d3.csv("data/data.csv").then((data) => {
@@ -317,27 +319,45 @@ function convertMapToGraph(allNodes: Map<string, Map<string, CountryNode[]>>): a
     <div className=" flex flex-row pt-44 h-screen px-2 w-full items-center overflow-hidden">
       <div className="flex flex-col w-[90%] items-center h-full">
         <h1 className="text-4xl font-bold z-10">Production Hierachy</h1>
-        <h3 className="text-2xl font-bold z-10">Zoom and drag around to view the different countries based on Production Type</h3>
-        <h4 className="text-2xl font-bold z-10">Click back and forth to see the relation between the country and energy type</h4>
-        {/* Show details on demand when we mouse hover over a tree map square */}
-        {/*TODO How do we move this div to be on the right hand side of the visualization instead of above it?*/}
+        <h3 className="text-2xl font-bold z-10">
+          Zoom and drag around to view the different countries based on Production Type
+        </h3>
+        <h4 className="text-2xl font-bold z-10">
+          Click back and forth to see the relation between the country and energy type
+        </h4>
         <div id="detailsProvider" className="flex flex-col flex-grow space-y-1 p-5">
           {(hover === undefined || hover === null) ? null : (
             <div className="flex flex-row">
-            <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-center">Details</h1>
-            <h3 className="text-xl font-bold text-center">{hover?.name}{hover?.isCountry ? ", " + hover?.continent : ": " + hover?.value.toFixed(0) + " TWh"}</h3>
-            {hover?.isCountry ? <h3 className="text-xl font-bold text-center">{hover?.method + ": " + hover?.value.toFixed(0) + " TWh"}</h3> : null }
-            </div>
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-bold text-center">Details</h1>
+                <h3 className="text-xl font-bold text-center">
+                  {hover?.name}{hover?.isCountry ? ", " + hover?.continent : ": " + hover?.value.toFixed(0) + " TWh"}
+                </h3>
+                {hover?.isCountry ? <h3 className="text-xl font-bold text-center">{hover?.method + ": " + hover?.value.toFixed(0) + " TWh"}</h3> : null }
+              </div>
             </div>
           )}
         </div>
-        <div className="flex flex-col">
-          <div id="treemap"></div>
+  
+        <div className="flex flex-row w-full">
+          <div id="treemap" className="w-[75%]"></div>
+  
+          {/* Add the legend here */}
+         
+          <div className="colorlegend">
+            <h2>Continent Color Key</h2>
+            {Array.from(continentToColorMap.entries()).map(([continent, color], index) => (
+              <div key={index} className="flex items-center mt-2">
+                <div style={{backgroundColor: color, width: 20, height: 20}}></div>
+                <div className="ml-2">{continent}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
+  
 
 };
 
