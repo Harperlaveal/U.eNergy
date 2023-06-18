@@ -379,8 +379,7 @@ export const TreeMap = () => {
                       <div key={y} className="year-list-entry">
                         <div
                           className={`year-list-year p-4 font-medium rounded opacity-90 hover:opacity-100 cursor-pointer hover:underline  ${
-                            //@ts-ignore
-                            y === year ? " text-blue-500 underline " : " "
+                            y === String(year) ? " text-blue-500 underline " : " "
                             } `}
                           onClick={() => {
                             //@ts-ignore
