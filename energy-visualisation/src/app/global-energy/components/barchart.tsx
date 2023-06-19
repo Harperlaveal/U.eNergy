@@ -96,7 +96,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
         .attr("x", 100)
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .text("Total Watts Produced (TWh)")
+        .text("Total Watts Produced (GWh)")
         .attr("font-size", "12px")
         .attr("fill", textColor);
     
@@ -168,7 +168,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year, se
       title={
         <Box>
           {tooltipData && <Typography>Country: {tooltipData.id}</Typography>}
-          {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
+          {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} GWh</Typography>}
         </Box>
       }
       placement="left"

@@ -21,9 +21,9 @@ const CountryTooltip: React.FC<CountryTooltipProps> = ({ open, countryData, chil
       title={
         <Box>
           {countryData && <Typography>Country: {countryData.id}</Typography>}
-          {countryData?.amount && <Typography>Total Energy Produced: {countryData.amount} TWh</Typography>}
-          {countryData?.renewable && <Typography>Renewable Energy Produced: {countryData.renewable} TWh</Typography>}
-          {countryData?.nonRenewable && <Typography>Non-renewable Energy Produced: {countryData.nonRenewable} TWh</Typography>}
+          {countryData?.amount && <Typography>Total Energy Produced: {countryData.amount} GWh</Typography>}
+          {countryData?.renewable && <Typography>Renewable Energy Produced: {countryData.renewable} GWh</Typography>}
+          {countryData?.nonRenewable && <Typography>Non-renewable Energy Produced: {countryData.nonRenewable} GWh</Typography>}
         </Box>
       }
       placement="right"

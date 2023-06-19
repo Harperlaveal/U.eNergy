@@ -303,7 +303,7 @@ export const SimilarCountriesPage = () => {
       };
 
       /**
-       * Countries that generated a similar amount of TWh will have larger similarity score.
+       * Countries that generated a similar amount of GWh will have larger similarity score.
        * @param countryA
        * @param countryB
        */
@@ -640,7 +640,7 @@ export const SimilarCountriesPage = () => {
                 <ul>
                   <li>Biggest Producer: {selectedCountry.largestMethod}</li>
                   <li>
-                    Energy Total: {Math.trunc(selectedCountry.energyTotal)} TWh
+                    Energy Total: {Math.trunc(selectedCountry.energyTotal)} GWh
                   </li>
                 </ul>
               </div>
