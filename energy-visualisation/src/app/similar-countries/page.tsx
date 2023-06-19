@@ -18,6 +18,7 @@ import React, { use, useEffect, useState } from "react";
 import * as d3 from "d3";
 import { Tooltip } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { saveAs } from "file-saver";
 
 /**
  * An array of strings that represent the different energy production methods
@@ -78,6 +79,8 @@ export const SimilarCountriesPage = () => {
   const [year, setYear] = useState<string>("2022");
   const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.86); // The closer to 1, the more similar the countries are
   const [selectedMethod, setSelectedMethod] = useState<string>("");
+  const [exportableCountries, setExportableCountries] = useState<Object[]>([]);
+  const [exportableEdges, setExportableEdges] = useState<Object[]>([]);
 
   const maxThreshold: number = 1;
   const minThreshold: number = -1;
@@ -546,9 +549,9 @@ export const SimilarCountriesPage = () => {
         .join("circle")
         .attr("r", 5)
         .attr("fill", (d: any) => productionColors[d.group])
-        .attr("fill-opacity", (d: any) => { 
-          if (selectedMethod !== ""){
-            if (d.largestMethod === selectedMethod){
+        .attr("fill-opacity", (d: any) => {
+          if (selectedMethod !== "") {
+            if (d.largestMethod === selectedMethod) {
               return 1;
             } else {
               return 0.2;
@@ -556,7 +559,7 @@ export const SimilarCountriesPage = () => {
           } else {
             return 1;
           }
-         })
+        })
         // Create a popup when a node is clicked with information about the node
         .on("click", (event: any, d: any) => {
           setSelectedCountry(d as Country);
@@ -602,6 +605,9 @@ export const SimilarCountriesPage = () => {
         event.subject.fx = null;
         event.subject.fy = null;
       }
+
+      setExportableCountries(countryTotals);
+      setExportableEdges(edges);
     });
   }, [year, similarityThreshold, selectedMethod]);
   /*This argument causes this function to be recalled if the selected year or similarity threshold changes*/
@@ -670,6 +676,46 @@ export const SimilarCountriesPage = () => {
         </div>
       </div>
       <div className="flex flex-col flex-grow space-y-1 p-5 rounded-lg shadow-xl z-10">
+        {/*The button to export current year's JSON*/}
+
+        <div className="flex flex-row justify-between">
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={() => {
+                let dataObj = {
+                  similarityThreshold: similarityThreshold,
+                  countries: exportableCountries.map((c: any) => {
+                    return {
+                      country: c.country,
+                      biggestProducer: c.biggestProducer,
+                      amount: c.amount,
+                      totalEnergy: c.totalEnergy,
+                    };
+                  }),
+                  edges: exportableEdges.map((e: any) => {
+                    return {
+                      source: e.source,
+                      target: e.target,
+                      value: e.value,
+                    };
+                  }),
+                };
+
+                // Convert to a JSON string with indentation
+                let dataStr = JSON.stringify(dataObj, null, 2);
+
+                const blob = new Blob([dataStr], {
+                  type: "text/plain;charset=utf-8",
+                });
+
+                saveAs(blob, `${year}_production_group_nodes.json`);
+              }}
+            >
+              Export Graph as JSON
+            </button>
+         
+        </div>
+
         <div id="color-map" className="flex-grow flex flex-col space-y-1">
           {
             // Add a div for each color in prductionColors
@@ -685,7 +731,13 @@ export const SimilarCountriesPage = () => {
                   ? "white"
                   : "black";
               return (
-                <div key={methodName} className="color-map-entry" onClick = { () => { setSelectedMethod(methodName) } }>
+                <div
+                  key={methodName}
+                  className="color-map-entry"
+                  onClick={() => {
+                    setSelectedMethod(methodName);
+                  }}
+                >
                   <div
                     className="color-map-color p-4 font-medium rounded  opacity-90 hover:opacity-100"
                     style={{ backgroundColor: color, color: textColor }}
