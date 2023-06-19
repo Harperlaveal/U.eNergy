@@ -141,7 +141,7 @@ export default function BarChart({ data, max }: BarChartProps) {
                 correspondingData.watts >= 1
                   ? Math.trunc(correspondingData.watts)
                   : correspondingData.watts
-              }TWh`
+              }GWh`
             );
         }
       })
@@ -179,7 +179,7 @@ export default function BarChart({ data, max }: BarChartProps) {
           .html(
             `Method: ${d.source}<br>Amount: ${
               d.watts >= 1 ? Math.trunc(d.watts) : d.watts
-            }TWh`
+            }GWh`
           );
       })
       .on("mouseout", function () {
@@ -233,7 +233,7 @@ export default function BarChart({ data, max }: BarChartProps) {
           <g className="y-axis" />
         </svg>
         <div className="absolute bottom-[-10px] left-0 right-0 text-center">
-          <h1 className="text-lg ">Amount Produced (Terrawatt Hours)</h1>
+          <h1 className="text-lg ">Amount Produced (Gigawatt Hours)</h1>
         </div>
       </div>
       <div className="overflow-visible no-wrap relative right-[-75px] flex flex-col items-center space-y-6 text-xs">
@@ -253,14 +253,14 @@ export default function BarChart({ data, max }: BarChartProps) {
         <div className="shadow-lg p-2 rounded-lg">
           <div>
             <h3 className="font-medium">Yearly Total</h3>
-            <div>{parseInt(totalProduction.toString())} TWh</div>
+            <div>{parseInt(totalProduction.toString())} GWh</div>
           </div>
           <div className="mt-2">
             <h3 className="font-medium">Yearly Breakdown</h3>
             <div className="font-light">
               {typeBreakdown.map((item, index) => (
                 <div key={index}>
-                  {item.source}: {parseInt(item.production.toString())} TWh
+                  {item.source}: {parseInt(item.production.toString())} GWh
                 </div>
               ))}
             </div>

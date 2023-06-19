@@ -60,7 +60,7 @@ export default function CountryStats({ countryName }: CountryStatsProps) {
           {Object.entries(totalProduction).map(([source, watts]) => (
             <li key={source} className="flex flex-row space-x-2">
               <h4 className="font-regular">{source}</h4>
-              <div className="font-light">{Math.trunc(watts)}TWh</div>
+              <div className="font-light">{Math.trunc(watts)}GWh</div>
             </li>
           ))}
         </ul>

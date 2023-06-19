@@ -231,10 +231,10 @@ export const TreeMap = () => {
             if (isCountry) {
               const continent = data.parent.data.name;
               const method = data.parent.parent.data.name;
-              // console.log("name: " + name + " TWh produced: " + value + " isCountry: " + isCountry + " continent: " + continent + " method: " + method);
+              // console.log("name: " + name + " GWh produced: " + value + " isCountry: " + isCountry + " continent: " + continent + " method: " + method);
               setHover({ name: name, value: value, isCountry: isCountry, continent: continent, method: method });
             } else {
-              // console.log("name: " + name + " TWh produced: " + value + " isCountry: " + isCountry);
+              // console.log("name: " + name + " GWh produced: " + value + " isCountry: " + isCountry);
               setHover({ name: name, value: value, isCountry: isCountry, continent: "", method: "" });
             }
             d3.select(this).style("fill-opacity", 0.5);
@@ -341,9 +341,9 @@ export const TreeMap = () => {
                 <div className="flex flex-col h-full">
                   <h1 className="text-2xl font-bold">Details</h1>
                   <h3 className="text-xl">
-                    {hover?.isCountry ? <a target="blank" className="hover:underline text-blue-500" href={`/country/${hover?.name}?initYear=${year}`}>{hover?.name}</a> : hover?.name}{hover?.isCountry ? ", " + hover?.continent : ": " + hover?.value.toFixed(0) + " TWh"}
+                    {hover?.isCountry ? <a target="blank" className="hover:underline text-blue-500" href={`/country/${hover?.name}?initYear=${year}`}>{hover?.name}</a> : hover?.name}{hover?.isCountry ? ", " + hover?.continent : ": " + hover?.value.toFixed(0) + " GWh"}
                   </h3>
-                  {hover?.isCountry ? <h3 className="text-xl">{hover?.method + ": " + hover?.value.toFixed(0) + " TWh"}</h3> : null}
+                  {hover?.isCountry ? <h3 className="text-xl">{hover?.method + ": " + hover?.value.toFixed(0) + " GWh"}</h3> : null}
                 </div>
               </div>
             )}

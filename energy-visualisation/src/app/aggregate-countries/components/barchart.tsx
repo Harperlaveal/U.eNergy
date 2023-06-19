@@ -125,7 +125,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
     title={
       <Box>
         {tooltipData && <Typography>Country: {tooltipData.id}</Typography>}
-        {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} TWh</Typography>}
+        {tooltipData && <Typography>Total Energy Produced: {tooltipData.amount} GWh</Typography>}
       </Box>
     }
     placement="left"
@@ -137,7 +137,7 @@ const BarChart: React.FC<BarChartProps> = ({ countryData, countryRange, year }) 
 
         {/* Axis labels */}
         <text x="-50" y="180" fontSize="12">{year}</text>
-        <text x="-10" y="-10" fontSize="12">Total Watts Produced (TWh)</text>
+        <text x="-10" y="-10" fontSize="12">Total Watts Produced (GWh)</text>
 
         {/* Bar chart */}
         {totals.map((total, index) => (

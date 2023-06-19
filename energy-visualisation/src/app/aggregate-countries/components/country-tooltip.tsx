@@ -16,7 +16,7 @@ const CountryTooltip: React.FC<CountryTooltipProps> = ({ open, countryData, chil
       title={
         <Box>
           {countryData && <Typography>Country: {countryData.id}</Typography>}
-          {countryData && <Typography>Total Energy Produced: {countryData.amount} TWh</Typography>}
+          {countryData && <Typography>Total Energy Produced: {countryData.amount} GWh</Typography>}
         </Box>
       }
       placement="right"
