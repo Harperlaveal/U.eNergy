@@ -86,25 +86,29 @@ export default function CountryViewer({
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
-      <div className="flex flex-row justify-between items-center w-full">
-        <div className="flex-grow text-center">
-          <h1 className="text-2xl font-medium">
-            Energy Production for {countryName} in the Year {selectedYear}
-          </h1>
-        </div>
-        <div className="space-x-2">
+      <div className="flex justify-between items-center w-full mb-3 px-6">
+        <div className="opacity-0 flex-grow"></div>
+        <h1 className="text-2xl font-medium flex-grow text-center">
+          Energy Production for {countryName} in the Year {selectedYear}
+        </h1>
+        <div className="flex space-x-2">
           <select
-            className="relative p-2 rounded shadow-md"
+            className="p-2 rounded shadow-md text-black"
             value={exportOption}
             onChange={(e) => setExportOption(e.target.value)}
           >
             <option value="all">All Years</option>
             <option value="current">Current Year</option>
           </select>
-          <button className="relative text-blue-500" onClick={saveDataToFile}>
+          <button
+            className="bg-blue-500 p-2 rounded text-white hover:shadow-md"
+            onClick={saveDataToFile}
+          >
             Extract Info
           </button>
         </div>
+      </div>
+      <div className="px-24 w-full">
         <BarChart
           data={
             selectedYear

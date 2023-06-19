@@ -17,7 +17,7 @@ export default function CountryPage({ params }: { params: { id: string } }) {
     <div className="flex flex-col pt-44 px-16 w-full">
       <CountryDataProvider>
         <div className="flex flex-row space-x-2">
-          <div className="pb-16 px-24 pt-8 shadow-xl min-w-[80%] h-[700px] justify-center items-center rounded-xl border">
+          <div className="pb-16 pt-8 shadow-xl min-w-[80%] h-[700px] justify-center items-center rounded-xl border">
             <CountryViewer
               countryName={countryName}
               initYear={parseInt(initYear.toString())}
