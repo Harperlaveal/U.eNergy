@@ -1,13 +1,6 @@
 # Visualisation of how countries inside the UN use energy
 
-**Team members**
-
-- Harper Doak
-- Moo Plah Soe (Plaso) Kusay
-- Gareth McIntosh
-- Ben Sanson
-
----
+This is hosted at www.U-energy.online
 
 ## How To Run The Project
 
